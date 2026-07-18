@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Professional English Vocab Tutor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .app-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: -webkit-linear-gradient(45deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .tab-btn {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 0.6rem 1.2rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            flex: 1 1 auto;
+            min-width: 100px;
+        }
+        .tab-btn:hover { background: rgba(59, 130, 246, 0.3); }
+        .tab-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        .filters {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .filters select, .filters input {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            width: 100%;
+            font-size: 1rem;
+        }
+        .hidden { display: none !important; }
+
+        /* List View */
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+            gap: 1rem;
+        }
+        @media(min-width: 600px) {
+            .word-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+            .filters { flex-direction: row; justify-content: center; }
+            .filters select, .filters input { width: auto; }
+            header h1 { font-size: 2.5rem; }
+        }
+        .word-card {
+            background: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s;
+        }
+        .word-card:active { transform: scale(0.98); }
+        .word-card h3 { color: #60a5fa; margin-bottom: 0.5rem; font-size: 1.2rem; }
+        .category-tag {
+            font-size: 0.75rem;
+            background: rgba(255,255,255,0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: var(--text-muted);
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+
+        /* Flashcard */
+        .flashcard-container {
+            perspective: 1000px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        .flashcard {
+            width: 100%;
+            height: 60vh;
+            max-height: 400px;
+            background: transparent;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(15px);
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .flashcard-front h2, .flashcard-back h2 { font-size: 2rem; color: #fff; margin: auto; word-break: break-word; }
+        .flashcard-back { transform: rotateY(180deg); background: rgba(59, 130, 246, 0.2); }
+        .flashcard-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            gap: 1rem;
+        }
+        .flashcard-controls button {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 600;
+        }
+        .flashcard-controls button:active { background: var(--primary); transform: scale(0.95); }
+
+        /* Quiz */
+        .quiz-container { 
+            max-width: 600px; margin: 0 auto; background: var(--card-bg); 
+            padding: 1.5rem; border-radius: 16px; text-align: center; 
+            border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px); 
+        }
+        .quiz-options { display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin-top: 1.5rem; }
+        @media(min-width: 600px) {
+            .quiz-options { grid-template-columns: 1fr 1fr; }
+        }
+        .quiz-option {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 1.25rem;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .quiz-option:active { background: rgba(255,255,255,0.15); transform: scale(0.98); }
+        .quiz-option.correct { background: var(--success) !important; border-color: var(--success); }
+        .quiz-option.wrong { background: var(--danger) !important; border-color: var(--danger); }
+        .feedback { margin-top: 1.5rem; font-size: 1.1rem; font-weight: bold; min-height: 1.5rem; }
+        #btn-next-question { 
+            margin-top: 1rem; background: var(--primary); border: none; 
+            padding: 1rem 2rem; border-radius: 12px; color: white; 
+            font-size: 1.1rem; font-weight:bold; cursor: pointer; width: 100%;
+        }
+        #btn-next-question:active { transform: scale(0.98); }
+        .progress { text-align: center; margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Vocab Tutor</h1>
+            <div class="nav-tabs">
+                <button class="tab-btn active" data-tab="list">List</button>
+                <button class="tab-btn" data-tab="flashcard">Flashcard</button>
+                <button class="tab-btn" data-tab="quiz">Quiz</button>
+            </div>
+            <div class="filters">
+                <select id="category-filter">
+                    <option value="all">All Categories</option>
+                    <option value="Physics">Physics</option>
+                    <option value="General">General Academic</option>
+                </select>
+                <input type="text" id="search-input" placeholder="Search words...">
+            </div>
+        </header>
+
+        <main>
+            <div id="js-warning" style="text-align:center; padding:2rem; color:#ef4444; background:rgba(239, 68, 68, 0.1); border-radius:12px; margin-bottom:1rem; border: 1px solid #ef4444;">
+                ⚠️ 警告：当前环境未运行代码，可能是因为您正处于微信/QQ的“文件预览”模式。<br><br>
+                👉 请点击右上角的菜单 (⋮ 或 ⋯)，选择<b>“在浏览器打开”</b>或<b>“用其他应用打开”</b>（如 Safari、Chrome 等）即可正常显示卡片！
+            </div>
+            <!-- List View -->
+            <section id="list-view" class="view-section active">
+                <div class="word-grid" id="word-grid"></div>
+            </section>
+
+            <!-- Flashcard View -->
+            <section id="flashcard-view" class="view-section hidden">
+                <div class="flashcard-container">
+                    <div class="flashcard" id="flashcard">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <h2 id="fc-word">Word</h2>
+                                <p id="fc-category" class="category-tag">Category</p>
+                                <p style="font-size: 0.8rem; margin-top: 1rem; opacity: 0.5;">Tap to flip</p>
+                            </div>
+                            <div class="flashcard-back">
+                                <h2 id="fc-translation">Translation</h2>
+                                <p style="font-size: 0.8rem; margin-top: 1rem; opacity: 0.5;">Tap to flip</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flashcard-controls">
+                        <button id="btn-prev">← Prev</button>
+                        <button id="btn-next">Next →</button>
+                    </div>
+                    <p class="progress" id="fc-progress">1 / 100</p>
+                </div>
+            </section>
+
+            <!-- Quiz View -->
+            <section id="quiz-view" class="view-section hidden">
+                <div class="quiz-container">
+                    <h2 id="quiz-question" style="font-size: 1.2rem; font-weight: normal;">What is the translation for:<br><span style="color:#60a5fa; margin-top:1rem; display:block; font-size:1.8rem; font-weight: 600;">Word</span></h2>
+                    <div class="quiz-options" id="quiz-options">
+                        <!-- Buttons injected here -->
+                    </div>
+                    <p id="quiz-feedback" class="feedback"></p>
+                    <button id="btn-next-question" class="hidden">Next Question</button>
+                    <p class="progress" id="quiz-progress">Score: 0 / 0</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+// --- DATA INJECTION ---
+const vocabData = [
+{w:"Condensed matter",t:"凝聚态",c:"Physics"},
+{w:"Solid state physics",t:"固体物理学",c:"Physics"},
+{w:"Crystal",t:"晶体",c:"Physics"},
+{w:"Amorphous",t:"非晶态/无定型",c:"Physics"},
+{w:"Quasicrystal",t:"准晶",c:"Physics"},
+{w:"Polycrystal",t:"多晶",c:"Physics"},
+{w:"Single crystal",t:"单晶",c:"Physics"},
+{w:"Lattice",t:"晶格/点阵",c:"Physics"},
+{w:"Bravais lattice",t:"布拉菲晶格",c:"Physics"},
+{w:"Unit cell",t:"晶胞",c:"Physics"},
+{w:"Primitive cell",t:"初基晶胞",c:"Physics"},
+{w:"Wigner-Seitz cell",t:"维格纳-赛兹晶胞",c:"Physics"},
+{w:"Basis",t:"基元",c:"Physics"},
+{w:"Translation",t:"平移",c:"Physics"},
+{w:"Rotation",t:"旋转",c:"Physics"},
+{w:"Reflection",t:"反射",c:"Physics"},
+{w:"Inversion",t:"反演",c:"Physics"},
+{w:"Symmetry",t:"对称性",c:"Physics"},
+{w:"Point group",t:"点群",c:"Physics"},
+{w:"Space group",t:"空间群",c:"Physics"},
+{w:"Glide plane",t:"滑移面",c:"Physics"},
+{w:"Screw axis",t:"螺旋轴",c:"Physics"},
+{w:"Crystal defect",t:"晶体缺陷",c:"Physics"},
+{w:"Vacancy",t:"空位",c:"Physics"},
+{w:"Interstitial",t:"间隙原子",c:"Physics"},
+{w:"Dislocation",t:"位错",c:"Physics"},
+{w:"Grain boundary",t:"晶界",c:"Physics"},
+{w:"Cleavage",t:"解理",c:"Physics"},
+{w:"Epitaxy",t:"外延",c:"Physics"},
+{w:"Isotropic",t:"各向同性",c:"Physics"},
+{w:"Reciprocal lattice",t:"倒易点阵",c:"Physics"},
+{w:"Brillouin zone",t:"布里渊区",c:"Physics"},
+{w:"Miller indices",t:"密勒指数",c:"Physics"},
+{w:"Diffraction",t:"衍射",c:"Physics"},
+{w:"Scattering",t:"散射",c:"Physics"},
+{w:"Bragg's law",t:"布拉格定律",c:"Physics"},
+{w:"Laue condition",t:"劳厄条件",c:"Physics"},
+{w:"Structure factor",t:"结构因子",c:"Physics"},
+{w:"Form factor",t:"形状因子",c:"Physics"},
+{w:"Cross section",t:"截面",c:"Physics"},
+{w:"Elastic scattering",t:"弹性散射",c:"Physics"},
+{w:"Inelastic scattering",t:"非弹性散射",c:"Physics"},
+{w:"X-ray diffraction",t:"X射线衍射",c:"Physics"},
+{w:"Neutron scattering",t:"中子散射",c:"Physics"},
+{w:"Electron diffraction",t:"电子衍射",c:"Physics"},
+{w:"Momentum transfer",t:"动量转移",c:"Physics"},
+{w:"Phase shift",t:"相移",c:"Physics"},
+{w:"Fourier transform",t:"傅里叶变换",c:"Physics"},
+{w:"Periodicity",t:"周期性",c:"Physics"},
+{w:"Wave vector",t:"波矢",c:"Physics"},
+{w:"Phonon",t:"声子",c:"Physics"},
+{w:"Vibration",t:"振动",c:"Physics"},
+{w:"Harmonic approximation",t:"简谐近似",c:"Physics"},
+{w:"Anharmonicity",t:"非简谐性",c:"Physics"},
+{w:"Dispersion relation",t:"色散关系",c:"Physics"},
+{w:"Acoustic branch",t:"声学支",c:"Physics"},
+{w:"Optical branch",t:"光学支",c:"Physics"},
+{w:"Density of states",t:"态密度",c:"Physics"},
+{w:"Specific heat",t:"比热",c:"Physics"},
+{w:"Debye model",t:"德拜模型",c:"Physics"},
+{w:"Einstein model",t:"爱因斯坦模型",c:"Physics"},
+{w:"Debye temperature",t:"德拜温度",c:"Physics"},
+{w:"Thermal conductivity",t:"热导率",c:"Physics"},
+{w:"Thermal expansion",t:"热膨胀",c:"Physics"},
+{w:"Gruneisen parameter",t:"格林爱森参数",c:"Physics"},
+{w:"Umklapp process",t:"U过程/翻转过程",c:"Physics"},
+{w:"Normal process",t:"N过程",c:"Physics"},
+{w:"Elasticity",t:"弹性",c:"Physics"},
+{w:"Bulk modulus",t:"体积模量",c:"Physics"},
+{w:"Shear modulus",t:"剪切模量",c:"Physics"},
+{w:"Compressibility",t:"压缩率",c:"Physics"},
+{w:"Electron-phonon coupling",t:"电子-声子耦合",c:"Physics"},
+{w:"Thermoelectric effect",t:"热电效应",c:"Physics"},
+{w:"Seebeck effect",t:"塞贝克效应",c:"Physics"},
+{w:"Peltier effect",t:"珀耳帖效应",c:"Physics"},
+{w:"Free electron gas",t:"自由电子气",c:"Physics"},
+{w:"Fermi energy",t:"费米能",c:"Physics"},
+{w:"Fermi surface",t:"费米面",c:"Physics"},
+{w:"Fermi level",t:"费米能级",c:"Physics"},
+{w:"Fermi-Dirac distribution",t:"费米-狄拉克分布",c:"Physics"},
+{w:"Pauli exclusion principle",t:"泡利不相容原理",c:"Physics"},
+{w:"Bloch's theorem",t:"布洛赫定理",c:"Physics"},
+{w:"Energy band",t:"能带",c:"Physics"},
+{w:"Band gap",t:"带隙/能隙",c:"Physics"},
+{w:"Valence band",t:"价带",c:"Physics"},
+{w:"Conduction band",t:"导带",c:"Physics"},
+{w:"Effective mass",t:"有效质量",c:"Physics"},
+{w:"Tight-binding model",t:"紧束缚模型",c:"Physics"},
+{w:"Nearly free electron model",t:"近自由电子模型",c:"Physics"},
+{w:"Kronig-Penney model",t:"克罗尼格-潘尼模型",c:"Physics"},
+{w:"Hole",t:"空穴",c:"Physics"},
+{w:"Work function",t:"功函数",c:"Physics"},
+{w:"Density functional theory",t:"密度泛函理论",c:"Physics"},
+{w:"First-principles",t:"第一性原理",c:"Physics"},
+{w:"Pseudopotential",t:"赝势",c:"Physics"},
+{w:"Strong correlation",t:"强关联",c:"Physics"},
+{w:"Mott insulator",t:"莫特绝缘体",c:"Physics"},
+{w:"Hubbard model",t:"哈伯德模型",c:"Physics"},
+{w:"Fermi liquid",t:"费米液体",c:"Physics"},
+{w:"Magnetism",t:"磁性",c:"Physics"},
+{w:"Magnetic moment",t:"磁矩",c:"Physics"},
+{w:"Magnetization",t:"磁化强度",c:"Physics"},
+{w:"Magnetic susceptibility",t:"磁化率",c:"Physics"},
+{w:"Permeability",t:"磁导率",c:"Physics"},
+{w:"Diamagnetism",t:"抗磁性",c:"Physics"},
+{w:"Paramagnetism",t:"顺磁性",c:"Physics"},
+{w:"Ferromagnetism",t:"铁磁性",c:"Physics"},
+{w:"Antiferromagnetism",t:"反铁磁性",c:"Physics"},
+{w:"Ferrimagnetism",t:"亚铁磁性",c:"Physics"},
+{w:"Curie temperature",t:"居里温度",c:"Physics"},
+{w:"Neel temperature",t:"奈尔温度",c:"Physics"},
+{w:"Exchange interaction",t:"交换相互作用",c:"Physics"},
+{w:"Heisenberg model",t:"海森堡模型",c:"Physics"},
+{w:"Ising model",t:"伊辛模型",c:"Physics"},
+{w:"Magnetic domain",t:"磁畴",c:"Physics"},
+{w:"Domain wall",t:"畴壁",c:"Physics"},
+{w:"Hysteresis loop",t:"磁滞回线",c:"Physics"},
+{w:"Coercivity",t:"矫顽力",c:"Physics"},
+{w:"Remanence",t:"剩磁",c:"Physics"},
+{w:"Magnetoresistance",t:"磁阻",c:"Physics"},
+{w:"Giant magnetoresistance",t:"巨磁阻",c:"Physics"},
+{w:"Spintronics",t:"自旋电子学",c:"Physics"},
+{w:"Spin-orbit coupling",t:"自旋轨道耦合",c:"Physics"},
+{w:"Magnon",t:"磁振子",c:"Physics"},
+{w:"Spin wave",t:"自旋波",c:"Physics"},
+{w:"Spin glass",t:"自旋玻璃",c:"Physics"},
+{w:"Skyrmion",t:"斯格明子",c:"Physics"},
+{w:"Hall effect",t:"霍尔效应",c:"Physics"},
+{w:"Anomalous Hall effect",t:"反常霍尔效应",c:"Physics"},
+{w:"Spin Hall effect",t:"自旋霍尔效应",c:"Physics"},
+{w:"Zeeman effect",t:"塞曼效应",c:"Physics"},
+{w:"Superconductivity",t:"超导电性",c:"Physics"},
+{w:"Zero resistance",t:"零电阻",c:"Physics"},
+{w:"Meissner effect",t:"迈斯纳效应",c:"Physics"},
+{w:"Critical temperature",t:"临界温度",c:"Physics"},
+{w:"Critical magnetic field",t:"临界磁场",c:"Physics"},
+{w:"Critical current",t:"临界电流",c:"Physics"},
+{w:"Type-I superconductor",t:"第一类超导体",c:"Physics"},
+{w:"Type-II superconductor",t:"第二类超导体",c:"Physics"},
+{w:"Vortex state",t:"涡旋态",c:"Physics"},
+{w:"Flux quantization",t:"磁通量子化",c:"Physics"},
+{w:"Cooper pair",t:"库珀对",c:"Physics"},
+{w:"BCS theory",t:"BCS理论",c:"Physics"},
+{w:"Energy gap",t:"能隙",c:"Physics"},
+{w:"Coherence length",t:"相干长度",c:"Physics"},
+{w:"Penetration depth",t:"穿透深度",c:"Physics"},
+{w:"London equation",t:"伦敦方程",c:"Physics"},
+{w:"Ginzburg-Landau theory",t:"金兹堡-朗道理论",c:"Physics"},
+{w:"Josephson effect",t:"约瑟夫森效应",c:"Physics"},
+{w:"SQUID",t:"超导量子干涉仪",c:"Physics"},
+{w:"High-Tc superconductor",t:"高温超导体",c:"Physics"},
+{w:"Cuprate",t:"铜氧化物",c:"Physics"},
+{w:"Iron-based superconductor",t:"铁基超导体",c:"Physics"},
+{w:"Isotope effect",t:"同位素效应",c:"Physics"},
+{w:"Unconventional superconductivity",t:"非常规超导",c:"Physics"},
+{w:"Pairing mechanism",t:"配对机制",c:"Physics"},
+{w:"Semiconductor",t:"半导体",c:"Physics"},
+{w:"Intrinsic",t:"本征的",c:"Physics"},
+{w:"Extrinsic",t:"杂质的",c:"Physics"},
+{w:"Doping",t:"掺杂",c:"Physics"},
+{w:"Donor",t:"施主",c:"Physics"},
+{w:"Acceptor",t:"受主",c:"Physics"},
+{w:"P-N junction",t:"P-N结",c:"Physics"},
+{w:"Depletion region",t:"耗尽层",c:"Physics"},
+{w:"Carrier concentration",t:"载流子浓度",c:"Physics"},
+{w:"Mobility",t:"迁移率",c:"Physics"},
+{w:"Recombination",t:"复合",c:"Physics"},
+{w:"Generation",t:"产生",c:"Physics"},
+{w:"Exciton",t:"激子",c:"Physics"},
+{w:"Plasmon",t:"等离激元",c:"Physics"},
+{w:"Polariton",t:"极化激元",c:"Physics"},
+{w:"Polaron",t:"极化子",c:"Physics"},
+{w:"Dielectric",t:"电介质",c:"Physics"},
+{w:"Polarization",t:"极化",c:"Physics"},
+{w:"Ferroelectricity",t:"铁电性",c:"Physics"},
+{w:"Piezoelectricity",t:"压电性",c:"Physics"},
+{w:"Permittivity",t:"介电常数",c:"Physics"},
+{w:"Refractive index",t:"折射率",c:"Physics"},
+{w:"Absorption",t:"吸收",c:"Physics"},
+{w:"Emission",t:"发射",c:"Physics"},
+{w:"Photoluminescence",t:"光致发光",c:"Physics"},
+{w:"Band bending",t:"能带弯曲",c:"Physics"},
+{w:"Schottky barrier",t:"肖特基势垒",c:"Physics"},
+{w:"Ohmic contact",t:"欧姆接触",c:"Physics"},
+{w:"Field-effect transistor",t:"场效应晶体管",c:"Physics"},
+{w:"Surface state",t:"表面态",c:"Physics"},
+{w:"Interface",t:"界面",c:"Physics"},
+{w:"Reconstruction",t:"重构",c:"Physics"},
+{w:"Relaxation",t:"弛豫",c:"Physics"},
+{w:"Adsorption",t:"吸附",c:"Physics"},
+{w:"Desorption",t:"脱附",c:"Physics"},
+{w:"Thin film",t:"薄膜",c:"Physics"},
+{w:"Monolayer",t:"单原子层",c:"Physics"},
+{w:"Two-dimensional material",t:"二维材料",c:"Physics"},
+{w:"Graphene",t:"石墨烯",c:"Physics"},
+{w:"Transition metal dichalcogenide",t:"过渡金属硫族化合物",c:"Physics"},
+{w:"Magic-angle twisted bilayer graphene",t:"魔角双层石墨烯",c:"Physics"},
+{w:"Moire superlattice",t:"莫尔超晶格",c:"Physics"},
+{w:"Quantum well",t:"量子阱",c:"Physics"},
+{w:"Quantum wire",t:"量子线",c:"Physics"},
+{w:"Quantum dot",t:"量子点",c:"Physics"},
+{w:"Topological insulator",t:"拓扑绝缘体",c:"Physics"},
+{w:"Quantum Hall effect",t:"量子霍尔效应",c:"Physics"},
+{w:"Fractional quantum Hall effect",t:"分数量子霍尔效应",c:"Physics"},
+{w:"Dirac semimetal",t:"狄拉克半金属",c:"Physics"},
+{w:"Weyl semimetal",t:"外尔半金属",c:"Physics"},
+{w:"Majorana fermion",t:"马约拉纳费米子",c:"Physics"},
+{w:"Berry phase",t:"贝里相位",c:"Physics"},
+{w:"Berry curvature",t:"贝里曲率",c:"Physics"},
+{w:"Chern number",t:"陈数",c:"Physics"},
+{w:"Edge state",t:"边缘态",c:"Physics"},
+{w:"Time-reversal symmetry",t:"时间反演对称性",c:"Physics"},
+{w:"Spin-momentum locking",t:"自旋动量锁定",c:"Physics"},
+{w:"Topological phase transition",t:"拓扑相变",c:"Physics"},
+{w:"Investigate",t:"调查/研究",c:"General"},
+{w:"Explore",t:"探索",c:"General"},
+{w:"Demonstrate",t:"证明/展示",c:"General"},
+{w:"Propose",t:"提出",c:"General"},
+{w:"Hypothesize",t:"假设",c:"General"},
+{w:"Synthesize",t:"合成",c:"General"},
+{w:"Fabricate",t:"制备/制造",c:"General"},
+{w:"Characterize",t:"表征",c:"General"},
+{w:"Optimize",t:"优化",c:"General"},
+{w:"Manipulate",t:"操纵/控制",c:"General"},
+{w:"Modulate",t:"调制",c:"General"},
+{w:"Tune",t:"调控",c:"General"},
+{w:"Integrate",t:"集成/整合",c:"General"},
+{w:"Simulate",t:"模拟",c:"General"},
+{w:"Emulate",t:"仿真",c:"General"},
+{w:"Validate",t:"验证",c:"General"},
+{w:"Verify",t:"核实/证明",c:"General"},
+{w:"Calibrate",t:"校准",c:"General"},
+{w:"Quantify",t:"量化",c:"General"},
+{w:"Extract",t:"提取",c:"General"},
+{w:"Deduce",t:"推导/推断",c:"General"},
+{w:"Derive",t:"推导",c:"General"},
+{w:"Formulate",t:"阐明/公式化",c:"General"},
+{w:"Elucidate",t:"阐明/解释",c:"General"},
+{w:"Unveil",t:"揭示",c:"General"},
+{w:"Reveal",t:"揭露/显示",c:"General"},
+{w:"Interpret",t:"解释/解读",c:"General"},
+{w:"Assign",t:"归因于/指派",c:"General"},
+{w:"Attribute",t:"归因于",c:"General"},
+{w:"Ascribe",t:"归因于",c:"General"},
+{w:"Correlate",t:"使相关联",c:"General"},
+{w:"Incorporate",t:"合并/纳入",c:"General"},
+{w:"Substitute",t:"替代",c:"General"},
+{w:"Dope",t:"掺杂",c:"General"},
+{w:"Modify",t:"修改/修饰",c:"General"},
+{w:"Enhance",t:"增强",c:"General"},
+{w:"Suppress",t:"抑制",c:"General"},
+{w:"Mitigate",t:"减轻/缓解",c:"General"},
+{w:"Facilitate",t:"促进",c:"General"},
+{w:"Hamper",t:"阻碍",c:"General"},
+{w:"Harness",t:"利用",c:"General"},
+{w:"Exploit",t:"开发/利用",c:"General"},
+{w:"Tailor",t:"定制/裁剪",c:"General"},
+{w:"Assemble",t:"组装",c:"General"},
+{w:"Deposit",t:"沉积",c:"General"},
+{w:"Etch",t:"刻蚀",c:"General"},
+{w:"Anneal",t:"退火",c:"General"},
+{w:"Quench",t:"淬火/猝灭",c:"General"},
+{w:"Purify",t:"提纯",c:"General"},
+{w:"Evaluate",t:"评估",c:"General"},
+{w:"Methodology",t:"方法学",c:"General"},
+{w:"Setup",t:"装置/设置",c:"General"},
+{w:"Apparatus",t:"仪器/设备",c:"General"},
+{w:"Parameter",t:"参数",c:"General"},
+{w:"Variable",t:"变量",c:"General"},
+{w:"Control",t:"对照/控制",c:"General"},
+{w:"Baseline",t:"基线",c:"General"},
+{w:"Background",t:"背景",c:"General"},
+{w:"Artifact",t:"假象/人为误差",c:"General"},
+{w:"Alignment",t:"对准/光路调整",c:"General"},
+{w:"Resolution",t:"分辨率",c:"General"},
+{w:"Sensitivity",t:"灵敏度",c:"General"},
+{w:"Accuracy",t:"准确度",c:"General"},
+{w:"Precision",t:"精密度",c:"General"},
+{w:"Tolerance",t:"容差",c:"General"},
+{w:"Threshold",t:"阈值",c:"General"},
+{w:"Criterion",t:"标准/准则",c:"General"},
+{w:"Protocol",t:"规程/草案",c:"General"},
+{w:"Reagent",t:"试剂",c:"General"},
+{w:"Solvent",t:"溶剂",c:"General"},
+{w:"Substrate",t:"衬底/基底",c:"General"},
+{w:"Precursor",t:"前驱体",c:"General"},
+{w:"Sample",t:"样品",c:"General"},
+{w:"Specimen",t:"标本/样品",c:"General"},
+{w:"Batch",t:"批次",c:"General"},
+{w:"Yield",t:"产率/产量",c:"General"},
+{w:"Ambient",t:"环境的/室温的",c:"General"},
+{w:"Vacuum",t:"真空",c:"General"},
+{w:"Ultra-high vacuum",t:"超高真空",c:"General"},
+{w:"Cryogenic",t:"低温的",c:"General"},
+{w:"Isothermal",t:"等温的",c:"General"},
+{w:"Adiabatic",t:"绝热的",c:"General"},
+{w:"Calibration curve",t:"校准曲线",c:"General"},
+{w:"Signal-to-noise ratio",t:"信噪比",c:"General"},
+{w:"Detection limit",t:"检测限",c:"General"},
+{w:"Reproducibility",t:"可重复性",c:"General"},
+{w:"Repeatability",t:"复现性",c:"General"},
+{w:"Reliability",t:"可靠性",c:"General"},
+{w:"Scalability",t:"可扩展性",c:"General"},
+{w:"Feasibility",t:"可行性",c:"General"},
+{w:"Durability",t:"耐久性",c:"General"},
+{w:"Degradation",t:"退化/降解",c:"General"},
+{w:"Fatigue",t:"疲劳",c:"General"},
+{w:"Stability",t:"稳定性",c:"General"},
+{w:"Fluctuation",t:"波动/涨落",c:"General"},
+{w:"Hysteresis",t:"迟滞现象",c:"General"},
+{w:"Excitation",t:"激发",c:"General"},
+{w:"Relaxation",t:"弛豫/恢复",c:"General"},
+{w:"Orientation",t:"取向/方向",c:"General"},
+{w:"Curve",t:"曲线",c:"General"},
+{w:"Spectrum",t:"光谱/能谱",c:"General"},
+{w:"Profile",t:"分布图/轮廓",c:"General"},
+{w:"Peak",t:"峰值",c:"General"},
+{w:"Valley",t:"谷",c:"General"},
+{w:"Plateau",t:"平台区",c:"General"},
+{w:"Shoulder",t:"肩峰",c:"General"},
+{w:"Dip",t:"倾角/下降",c:"General"},
+{w:"Anomaly",t:"异常/反常",c:"General"},
+{w:"Trend",t:"趋势",c:"General"},
+{w:"Tendency",t:"倾向",c:"General"},
+{w:"Deviation",t:"偏差",c:"General"},
+{w:"Discrepancy",t:"差异/不一致",c:"General"},
+{w:"Variance",t:"方差",c:"General"},
+{w:"Standard deviation",t:"标准差",c:"General"},
+{w:"Error bar",t:"误差棒",c:"General"},
+{w:"Outlier",t:"异常值",c:"General"},
+{w:"Baseline shift",t:"基线漂移",c:"General"},
+{w:"Broadening",t:"展宽",c:"General"},
+{w:"Narrowing",t:"变窄",c:"General"},
+{w:"Splitting",t:"分裂",c:"General"},
+{w:"Shift",t:"位移",c:"General"},
+{w:"Quenching",t:"淬灭",c:"General"},
+{w:"Saturation",t:"饱和",c:"General"},
+{w:"Onset",t:"起始点",c:"General"},
+{w:"Roll-off",t:"衰减/滚降",c:"General"},
+{w:"Oscillation",t:"振荡",c:"General"},
+{w:"Periodicity",t:"周期性",c:"General"},
+{w:"Asymmetry",t:"不对称性",c:"General"},
+{w:"Isotropy",t:"各向同性",c:"General"},
+{w:"Anisotropy",t:"各向异性",c:"General"},
+{w:"Homogeneity",t:"均匀性",c:"General"},
+{w:"Heterogeneity",t:"异质性",c:"General"},
+{w:"Prominent",t:"显著的/突出的",c:"General"},
+{w:"Pronounced",t:"明显的",c:"General"},
+{w:"Distinct",t:"清晰的/独特的",c:"General"},
+{w:"Subtle",t:"微小的/微妙的",c:"General"},
+{w:"Marginal",t:"边缘的/微小的",c:"General"},
+{w:"Negligible",t:"可忽略的",c:"General"},
+{w:"Robust",t:"稳健的/鲁棒的",c:"General"},
+{w:"Fragile",t:"脆弱的",c:"General"},
+{w:"Drastic",t:"剧烈的",c:"General"},
+{w:"Abrupt",t:"突然的/陡峭的",c:"General"},
+{w:"Gradual",t:"平缓的/渐进的",c:"General"},
+{w:"Linear",t:"线性的",c:"General"},
+{w:"Non-linear",t:"非线性的",c:"General"},
+{w:"Exponential",t:"指数的",c:"General"},
+{w:"Logarithmic",t:"对数的",c:"General"},
+{w:"Proportional",t:"成比例的",c:"General"},
+{w:"Literature",t:"文献",c:"General"},
+{w:"State-of-the-art",t:"最先进的/目前最高水平",c:"General"},
+{w:"Paradigm",t:"范式",c:"General"},
+{w:"Benchmark",t:"基准/标杆",c:"General"},
+{w:"Milestone",t:"里程碑",c:"General"},
+{w:"Breakthrough",t:"突破",c:"General"},
+{w:"Novelty",t:"新颖性",c:"General"},
+{w:"Originality",t:"原创性",c:"General"},
+{w:"Perspective",t:"视角/观点",c:"General"},
+{w:"Insight",t:"见解",c:"General"},
+{w:"Consensus",t:"共识",c:"General"},
+{w:"Controversy",t:"争议",c:"General"},
+{w:"Debate",t:"辩论/争论",c:"General"},
+{w:"Paradox",t:"悖论",c:"General"},
+{w:"Dilemma",t:"困境",c:"General"},
+{w:"Comprehensive",t:"全面的/综合的",c:"General"},
+{w:"Systematic",t:"系统的",c:"General"},
+{w:"Exhaustive",t:"详尽的/彻底的",c:"General"},
+{w:"Preliminary",t:"初步的",c:"General"},
+{w:"In-depth",t:"深入的",c:"General"},
+{w:"Pioneering",t:"开创性的",c:"General"},
+{w:"Seminal",t:"具有开创性/深远影响的",c:"General"},
+{w:"Prevailing",t:"盛行的/占主导地位的",c:"General"},
+{w:"Conventional",t:"传统的/常规的",c:"General"},
+{w:"Unconventional",t:"非常规的",c:"General"},
+{w:"Orthodox",t:"正统的",c:"General"},
+{w:"Emerging",t:"新兴的",c:"General"},
+{w:"Synergistic",t:"协同的",c:"General"},
+{w:"Complementary",t:"互补的",c:"General"},
+{w:"Interdisciplinary",t:"跨学科的",c:"General"},
+{w:"Hypothesis",t:"假说",c:"General"},
+{w:"Review",t:"综述/回顾",c:"General"},
+{w:"Peer-reviewed",t:"同行评审的",c:"General"},
+{w:"Citation",t:"引用",c:"General"},
+{w:"Acknowledge",t:"致谢/承认",c:"General"},
+{w:"Address",t:"解决/探讨",c:"General"},
+{w:"Tackle",t:"处理/解决",c:"General"},
+{w:"Clarify",t:"澄清",c:"General"},
+{w:"Emphasize",t:"强调",c:"General"},
+{w:"Highlight",t:"突出",c:"General"},
+{w:"Underpin",t:"支撑/构成...的基础",c:"General"},
+{w:"Contradict",t:"反驳/与...矛盾",c:"General"},
+{w:"Corroborate",t:"证实/支持",c:"General"},
+{w:"Pave the way",t:"为...铺平道路",c:"General"},
+{w:"Shed light on",t:"阐明/使...清楚",c:"General"},
+{w:"Pros and cons",t:"优缺点",c:"General"},
+{w:"Trade-off",t:"权衡/折衷",c:"General"},
+{w:"Figure of merit",t:"优值/品质因数",c:"General"},
+{w:"Theory",t:"理论",c:"General"},
+{w:"Theorem",t:"定理",c:"General"},
+{w:"Principle",t:"原理",c:"General"},
+{w:"Law",t:"定律",c:"General"},
+{w:"Axiom",t:"公理",c:"General"},
+{w:"Postulate",t:"假设/公设",c:"General"},
+{w:"Assumption",t:"假设",c:"General"},
+{w:"Approximation",t:"近似",c:"General"},
+{w:"Formulation",t:"公式化/表达",c:"General"},
+{w:"Equation",t:"方程式",c:"General"},
+{w:"Formula",t:"公式",c:"General"},
+{w:"Derivation",t:"推导",c:"General"},
+{w:"Calculation",t:"计算",c:"General"},
+{w:"Computation",t:"计算/计算机运算",c:"General"},
+{w:"Algorithm",t:"算法",c:"General"},
+{w:"Mechanism",t:"机制/机理",c:"General"},
+{w:"Dynamics",t:"动力学",c:"General"},
+{w:"Kinetics",t:"反应动力学",c:"General"},
+{w:"Thermodynamics",t:"热力学",c:"General"},
+{w:"Topology",t:"拓扑",c:"General"},
+{w:"Geometry",t:"几何",c:"General"},
+{w:"Rigorous",t:"严谨的/严格的",c:"General"},
+{w:"Empirical",t:"经验的",c:"General"},
+{w:"Phenomenological",t:"唯象的",c:"General"},
+{w:"Heuristic",t:"启发式的",c:"General"},
+{w:"Qualitative",t:"定性的",c:"General"},
+{w:"Quantitative",t:"定量的",c:"General"},
+{w:"Analytical",t:"解析的/分析的",c:"General"},
+{w:"Numerical",t:"数值的",c:"General"},
+{w:"Intrinsic",t:"本征的/固有的",c:"General"},
+{w:"Extrinsic",t:"外在的/非本征的",c:"General"},
+{w:"Macroscopic",t:"宏观的",c:"General"},
+{w:"Microscopic",t:"微观的",c:"General"},
+{w:"Mesoscopic",t:"介观的",c:"General"},
+{w:"Valid",t:"有效的/成立的",c:"General"},
+{w:"Applicable",t:"适用的",c:"General"},
+{w:"Universal",t:"普适的",c:"General"},
+{w:"Specific",t:"特定的/具体的",c:"General"},
+{w:"Trivial",t:"平庸的/微不足道的",c:"General"},
+{w:"Non-trivial",t:"非平庸的/重要的",c:"General"},
+{w:"Degenerate",t:"简并的",c:"General"},
+{w:"Commensurate",t:"公度的",c:"General"},
+{w:"Coherent",t:"相干的/连贯的",c:"General"},
+{w:"Spontaneous",t:"自发的",c:"General"},
+{w:"Induced",t:"诱导的",c:"General"},
+{w:"Reversible",t:"可逆的",c:"General"},
+{w:"Irreversible",t:"不可逆的",c:"General"},
+{w:"Quasi-",t:"准...",c:"General"},
+{w:"Pseudo-",t:"赝...",c:"General"},
+{w:"Nano-",t:"纳米...",c:"General"},
+{w:"Bulk",t:"块体",c:"General"},
+{w:"In-situ",t:"原位",c:"General"},
+{w:"Ex-situ",t:"非原位",c:"General"},
+{w:"Ab initio",t:"从头算/第一性原理",c:"General"},
+{w:"A priori",t:"先验的",c:"General"},
+{w:"A posteriori",t:"后验的",c:"General"},
+{w:"Vice versa",t:"反之亦然",c:"General"},
+{w:"Et al.",t:"等人",c:"General"},
+{w:"Ibid.",t:"同上",c:"General"},
+{w:"Respectively",t:"分别地",c:"General"},
+{w:"Optimal",t:"最佳的",c:"General"},
+{w:"Nominal",t:"名义上的",c:"General"},
+{w:"Apparent",t:"表观的/明显的",c:"General"},
+{w:"Equivalent",t:"等效的/等价的",c:"General"},
+{w:"Reciprocal",t:"倒数的/互惠的",c:"General"},
+{w:"Mutual",t:"相互的",c:"General"},
+{w:"Simultaneous",t:"同时的",c:"General"},
+{w:"Sequential",t:"连续的/按顺序的",c:"General"},
+{w:"Consecutive",t:"连续的",c:"General"},
+{w:"Subsequent",t:"随后的",c:"General"},
+{w:"Spatial",t:"空间的",c:"General"},
+{w:"Temporal",t:"时间的",c:"General"},
+{w:"Static",t:"静态的",c:"General"},
+{w:"Dynamic",t:"动态的",c:"General"},
+{w:"Transient",t:"瞬态的/短暂的",c:"General"},
+{w:"Steady-state",t:"稳态的",c:"General"},
+{w:"Intact",t:"完好无损的",c:"General"},
+{w:"Defective",t:"有缺陷的",c:"General"},
+{w:"Pristine",t:"原始的/未受破坏的",c:"General"},
+{w:"Residual",t:"残留的",c:"General"},
+{w:"Preceding",t:"在前的/前面的",c:"General"},
+{w:"Predominant",t:"占主导地位的",c:"General"},
+{w:"Inherently",t:"内在地/天生地",c:"General"},
+{w:"Spatially",t:"空间上地",c:"General"},
+{w:"Furthermore",t:"此外/而且",c:"General"},
+{w:"Nevertheless",t:"然而/尽管如此",c:"General"},
+{w:"Consequently",t:"因此/结果",c:"General"},
+{w:"Alternatively",t:"或者/另一方面",c:"General"},
+{w:"Conversely",t:"相反地",c:"General"},
+{w:"Intriguingly",t:"有趣的是",c:"General"},
+{w:"Strikingly",t:"引人注目地",c:"General"},
+{w:"Notably",t:"值得注意的是",c:"General"},
+{w:"Namely",t:"即/也就是",c:"General"},
+{w:"Viz.",t:"即 (videlicet)",c:"General"},
+{w:"Via",t:"通过/经由",c:"General"},
+{w:"Versus (vs.)",t:"与...相对",c:"General"},
+{w:"Yield",t:"产出/得出 (动词)",c:"General"}
+];
+
+// --- APP LOGIC ---
+let currentList = [];
+let fcIndex = 0;
+
+const DOM = {
+    tabs: document.querySelectorAll('.tab-btn'),
+    views: document.querySelectorAll('.view-section'),
+    categoryFilter: document.getElementById('category-filter'),
+    searchInput: document.getElementById('search-input'),
+    wordGrid: document.getElementById('word-grid'),
+    
+    fcWord: document.getElementById('fc-word'),
+    fcTranslation: document.getElementById('fc-translation'),
+    fcCategory: document.getElementById('fc-category'),
+    flashcard: document.getElementById('flashcard'),
+    btnPrev: document.getElementById('btn-prev'),
+    btnNext: document.getElementById('btn-next'),
+    fcProgress: document.getElementById('fc-progress'),
+
+    quizQuestion: document.querySelector('#quiz-question span'),
+    quizOptions: document.getElementById('quiz-options'),
+    quizFeedback: document.getElementById('quiz-feedback'),
+    btnNextQ: document.getElementById('btn-next-question'),
+    quizProgress: document.getElementById('quiz-progress')
+};
+
+let quizScore = 0;
+let quizTotal = 0;
+let currentQuizWord = null;
+
+function init() {
+    currentList = [...vocabData];
+    renderList();
+    updateFlashcard();
+    
+    DOM.tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+    DOM.categoryFilter.addEventListener('change', filterData);
+    DOM.searchInput.addEventListener('input', filterData);
+    
+    DOM.flashcard.addEventListener('click', () => DOM.flashcard.classList.toggle('flipped'));
+    DOM.btnPrev.addEventListener('click', () => {
+        if(fcIndex > 0) { fcIndex--; updateFlashcard(); }
+    });
+    DOM.btnNext.addEventListener('click', () => {
+        if(fcIndex < currentList.length - 1) { fcIndex++; updateFlashcard(); }
+    });
+
+    DOM.btnNextQ.addEventListener('click', loadQuizQuestion);
+}
+
+function switchTab(tabId) {
+    DOM.tabs.forEach(t => t.classList.remove('active'));
+    document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+    
+    DOM.views.forEach(v => v.classList.add('hidden'));
+    document.getElementById(`${tabId}-view`).classList.remove('hidden');
+
+    if(tabId === 'quiz') {
+        quizScore = 0; quizTotal = 0;
+        loadQuizQuestion();
+    }
+}
+
+function filterData() {
+    const query = DOM.searchInput.value.toLowerCase();
+    const cat = DOM.categoryFilter.value;
+    
+    currentList = vocabData.filter(item => {
+        const matchQuery = item.w.toLowerCase().includes(query) || item.t.toLowerCase().includes(query);
+        const matchCat = cat === 'all' || item.c.includes(cat);
+        return matchQuery && matchCat;
+    });
+    
+    fcIndex = 0;
+    renderList();
+    updateFlashcard();
+}
+
+function renderList() {
+    if(currentList.length === 0) {
+        DOM.wordGrid.innerHTML = '<p style="text-align:center; width:100%; color:#94a3b8;">No words found matching your criteria.</p>';
+        return;
+    }
+    DOM.wordGrid.innerHTML = currentList.map(item => `
+        <div class="word-card">
+            <h3>${item.w}</h3>
+            <p>${item.t}</p>
+            <span class="category-tag">${item.c}</span>
+        </div>
+    `).join('');
+}
+
+function updateFlashcard() {
+    if(currentList.length === 0) {
+        DOM.fcWord.textContent = "N/A";
+        DOM.fcTranslation.textContent = "N/A";
+        DOM.fcCategory.textContent = "";
+        DOM.fcProgress.textContent = "0 / 0";
+        return;
+    }
+    DOM.flashcard.classList.remove('flipped');
+    const item = currentList[fcIndex];
+    
+    setTimeout(() => {
+        DOM.fcWord.textContent = item.w;
+        DOM.fcTranslation.textContent = item.t;
+        DOM.fcCategory.textContent = item.c;
+        DOM.fcProgress.textContent = `${fcIndex + 1} / ${currentList.length}`;
+    }, 150);
+}
+
+function shuffle(array) {
+    let arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function loadQuizQuestion() {
+    if(currentList.length < 4) {
+        DOM.quizQuestion.innerHTML = "Not enough words in this category to generate a quiz.";
+        DOM.quizOptions.innerHTML = '';
+        return;
+    }
+    
+    DOM.btnNextQ.classList.add('hidden');
+    DOM.quizFeedback.textContent = '';
+    
+    currentQuizWord = currentList[Math.floor(Math.random() * currentList.length)];
+    DOM.quizQuestion.textContent = currentQuizWord.w;
+    
+    let wrongOptions = currentList.filter(item => item.w !== currentQuizWord.w);
+    wrongOptions = shuffle(wrongOptions).slice(0, 3);
+    
+    let options = [currentQuizWord, ...wrongOptions];
+    options = shuffle(options);
+    
+    DOM.quizOptions.innerHTML = options.map(opt => 
+        `<button class="quiz-option" data-correct="${opt.w === currentQuizWord.w}">${opt.t}</button>`
+    ).join('');
+    
+    document.querySelectorAll('.quiz-option').forEach(btn => {
+        btn.addEventListener('click', handleQuizAnswer);
+    });
+}
+
+function handleQuizAnswer(e) {
+    const isCorrect = e.target.dataset.correct === 'true';
+    const btns = document.querySelectorAll('.quiz-option');
+    
+    btns.forEach(btn => btn.disabled = true);
+    
+    if(isCorrect) {
+        e.target.classList.add('correct');
+        DOM.quizFeedback.textContent = "Correct! 🎉";
+        DOM.quizFeedback.style.color = "var(--success)";
+        quizScore++;
+    } else {
+        e.target.classList.add('wrong');
+        DOM.quizFeedback.textContent = `Wrong! The correct answer is: ${currentQuizWord.t}`;
+        DOM.quizFeedback.style.color = "var(--danger)";
+        btns.forEach(btn => {
+            if(btn.dataset.correct === 'true') btn.classList.add('correct');
+        });
+    }
+    
+    quizTotal++;
+    DOM.quizProgress.textContent = `Score: ${quizScore} / ${quizTotal}`;
+    DOM.btnNextQ.classList.remove('hidden');
+}
+
+// Hide the JS warning since JS is running
+document.getElementById('js-warning').style.display = 'none';
+init();
+    </script>
+</body>
+</html>
