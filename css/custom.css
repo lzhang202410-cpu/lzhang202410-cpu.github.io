@@ -1,0 +1,244 @@
+/* =========================================================
+   博客三层架构与科技感卡片系统 (Three-tier Portal & Cards)
+   ========================================================= */
+
+/* 1. 隐藏头像下方的“分类”统计项 */
+.card-widget.card-info .site-data a[href*="/categories/"],
+#sidebar-menus .site-data a[href*="/categories/"] {
+  display: none !important;
+}
+
+.card-widget.card-info .site-data,
+#sidebar-menus .site-data {
+  display: flex;
+  justify-content: space-around;
+  padding: 0 16px;
+}
+
+/* 2. 第二层：模块聚合页导航卡片矩阵 (Portal Card Grid) */
+.portal-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 22px;
+  margin: 28px 0 36px 0;
+}
+
+.portal-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 24px;
+  border: 1px solid rgba(0, 196, 182, 0.25);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+  text-decoration: none !important;
+  color: #333333 !important;
+  transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.portal-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(180deg, #00c4b6, #0083ff);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.portal-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 28px rgba(0, 196, 182, 0.22);
+  border-color: #00c4b6;
+}
+
+.portal-card:hover::before {
+  opacity: 1;
+}
+
+.portal-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.portal-card-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(0, 196, 182, 0.12);
+  color: #009d91;
+  letter-spacing: 0.5px;
+}
+
+.portal-card-icon {
+  font-size: 1.6rem;
+  color: #00c4b6;
+  transition: transform 0.3s ease;
+}
+
+.portal-card:hover .portal-card-icon {
+  transform: scale(1.15) rotate(6deg);
+  color: #0083ff;
+}
+
+.portal-card-title {
+  font-size: 1.22rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+  line-height: 1.4;
+  transition: color 0.2s ease;
+}
+
+.portal-card:hover .portal-card-title {
+  color: #00c4b6;
+}
+
+.portal-card-desc {
+  font-size: 0.88rem;
+  color: #666666;
+  line-height: 1.55;
+  margin: 0 0 16px 0;
+}
+
+.portal-card-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+  flex-grow: 1;
+  border-top: 1px dashed rgba(0, 196, 182, 0.15);
+  padding-top: 12px;
+}
+
+.portal-card-list li {
+  font-size: 0.86rem;
+  color: #4f5959;
+  line-height: 1.7;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.portal-card-list li i {
+  color: #00c4b6;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.portal-card-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #00c4b6 0%, #00a498 100%);
+  color: #ffffff !important;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 8px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 196, 182, 0.25);
+  margin-top: auto;
+}
+
+.portal-card:hover .portal-card-btn {
+  background: linear-gradient(135deg, #00e5d5 0%, #0083ff 100%);
+  box-shadow: 0 6px 16px rgba(0, 196, 182, 0.4);
+  transform: translateY(-2px);
+}
+
+.portal-card-btn i {
+  transition: transform 0.2s ease;
+}
+
+.portal-card:hover .portal-card-btn i {
+  transform: translateX(4px);
+}
+
+/* 3. 第三层：章节独立页面面包屑导航与收尾导航条 */
+.page-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.86rem;
+  color: #7f8c8d;
+  margin-bottom: 24px;
+  padding: 10px 16px;
+  background: rgba(0, 196, 182, 0.06);
+  border-radius: 8px;
+  border-left: 3px solid #00c4b6;
+}
+
+.page-breadcrumb a {
+  color: #009d91 !important;
+  text-decoration: none !important;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.page-breadcrumb a:hover {
+  color: #0083ff !important;
+}
+
+.page-breadcrumb .sep {
+  color: #bdc3c7;
+  font-size: 0.8rem;
+}
+
+.page-breadcrumb .current {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.page-nav-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px dashed rgba(0, 196, 182, 0.25);
+}
+
+.back-portal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #00c4b6 !important;
+  text-decoration: none !important;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: rgba(0, 196, 182, 0.08);
+  border: 1px solid rgba(0, 196, 182, 0.2);
+  transition: all 0.2s ease;
+}
+
+.back-portal-btn:hover {
+  background: #00c4b6;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0, 196, 182, 0.3);
+}
+
+/* 移动端适配优化 */
+@media screen and (max-width: 768px) {
+  .portal-card-grid {
+    grid-template-columns: 1fr;
+  }
+  .portal-card {
+    padding: 18px;
+  }
+}

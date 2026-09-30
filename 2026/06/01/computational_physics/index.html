@@ -1,0 +1,348 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>计算物理 | notebook</title><meta name="author" content="Liang Zhang"><meta name="copyright" content="Liang Zhang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="本篇为计算物理全流程技能栈与实战指南，涵盖 Hexo 博客搭建、Markdown 排版规范、Linux Shell 开发环境、SSH 与超算 Slurm 调度系统、VASP 硅能带六步法工作流及科学计算（MATLAB &amp; Python）核心算法代码库。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算物理">
+<meta property="og:url" content="https://lzhang202410-cpu.github.io/2026/06/01/computational_physics/index.html">
+<meta property="og:site_name" content="notebook">
+<meta property="og:description" content="本篇为计算物理全流程技能栈与实战指南，涵盖 Hexo 博客搭建、Markdown 排版规范、Linux Shell 开发环境、SSH 与超算 Slurm 调度系统、VASP 硅能带六步法工作流及科学计算（MATLAB &amp; Python）核心算法代码库。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lzhang202410-cpu.github.io/img/sky.png">
+<meta property="article:published_time" content="2026-06-01T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-30T04:16:47.303Z">
+<meta property="article:author" content="Liang Zhang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lzhang202410-cpu.github.io/img/sky.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "计算物理",
+  "url": "https://lzhang202410-cpu.github.io/2026/06/01/computational_physics/",
+  "image": "https://lzhang202410-cpu.github.io/img/sky.png",
+  "datePublished": "2026-06-01T04:00:00.000Z",
+  "dateModified": "2026-09-30T04:16:47.303Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Liang Zhang",
+      "url": "https://lzhang202410-cpu.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://lzhang202410-cpu.github.io/2026/06/01/computational_physics/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '计算物理',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-color: #F2F6FC;"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/sky.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user-astronaut"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">notebook</span></a><a class="nav-page-title" href="/"><span class="site-name">计算物理</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user-astronaut"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">计算物理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-01T04:00:00.000Z" title="发表于 2026-06-01 12:00:00">2026-06-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-30T04:16:47.303Z" title="更新于 2026-09-30 12:16:47">2026-09-30</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E7%89%A9%E7%90%86/">计算物理</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E7%89%A9%E7%90%86/%E6%A0%B8%E5%BF%83%E6%8A%80%E8%83%BD/">核心技能</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>本篇为<strong>计算物理</strong>全流程基本功与实战总结，系统梳理了从基础开发环境、代码工程到超算集群与第一性原理材料计算的核心技能栈：</p>
+<ul>
+<li><strong>Hexo 搭建个人博客教程</strong>：从 Node.js 运行引擎、Git 身份配置到 Hexo 站点初始化、常用指令速查及 GitHub Pages 一键自动化部署；</li>
+<li><strong>Markdown 语法规范与排版指南</strong>：系统整理学术笔记排版必备语法，涵盖标题样式、列表、表格与 LaTeX 公式；</li>
+<li><strong>Linux Shell 常用命令与开发环境</strong>：包含 Python&#x2F;Conda 虚拟环境、目录导航、打包解压、环境变量与 alias、流重定向及 Vim 全指南；</li>
+<li><strong>SSH 连接服务器与超算作业管理</strong>：解析 SSH 服务配置、Linux 三大数据流重定向、超算 Slurm 调度系统（sbatch&#x2F;squeue&#x2F;scancel）及后台实时监控；</li>
+<li><strong>VASP 第一性原理能带计算工作流</strong>：详述输入输出文件架构、收敛性判据、Si 能带六步法、HSE06 杂化泛函进阶与 STOPCAR 安全终止机制；</li>
+<li><strong>计算物理科学计算核心代码库</strong>：汇集 MATLAB 数值积分&#x2F;ODE相轨迹&#x2F;插值与 Python 欧拉法刚性方程求解核心代码。</li>
+</ul>
+<span id="more"></span>
+
+<div class="page-breadcrumb">
+  <a href="/"><i class="fas fa-home"></i> 首页</a>
+  <span class="sep"><i class="fas fa-chevron-right"></i></span>
+  <span class="current"><i class="fas fa-microchip"></i> 计算物理</span>
+</div>
+
+<h1 id="计算物理-·-章节导航"><a href="#计算物理-·-章节导航" class="headerlink" title="计算物理 · 章节导航"></a>计算物理 · 章节导航</h1><p>点击下方导航卡片，进入对应章节阅读完整理论、命令速查与科学计算源码：</p>
+<div class="portal-card-grid">
+
+  <a href="/computational-physics/hexo/" class="portal-card">
+    <div class="portal-card-header">
+      <span class="portal-card-badge">导航卡片 01</span>
+      <i class="fas fa-globe portal-card-icon"></i>
+    </div>
+    <div class="portal-card-title">Hexo 搭建个人博客教程</div>
+    <div class="portal-card-desc">轻量高效的个人学术与技术分享站点，实现从本地初始化到 GitHub Pages 自动化发布。</div>
+    <ul class="portal-card-list">
+      <li><i class="fas fa-check-circle"></i> Node.js 运行引擎与环境校验</li>
+      <li><i class="fas fa-check-circle"></i> Git 全局提交者身份配置</li>
+      <li><i class="fas fa-check-circle"></i> Hexo 常用指令速查与黄金组合</li>
+      <li><i class="fas fa-check-circle"></i> GitHub Pages 部署与一键自动化</li>
+    </ul>
+    <div class="portal-card-btn">
+      进入章节阅读 <i class="fas fa-arrow-right"></i>
+    </div>
+  </a>
+
+  <a href="/computational-physics/markdown/" class="portal-card">
+    <div class="portal-card-header">
+      <span class="portal-card-badge">导航卡片 02</span>
+      <i class="fab fa-markdown portal-card-icon"></i>
+    </div>
+    <div class="portal-card-title">Markdown 语法规范与排版指南</div>
+    <div class="portal-card-desc">学术笔记与技术文档排版必备语法，兼具极高的编写效率与结构美感。</div>
+    <ul class="portal-card-list">
+      <li><i class="fas fa-check-circle"></i> 标题层级与文本基本样式</li>
+      <li><i class="fas fa-check-circle"></i> 引用块与待办任务清单（Checklist）</li>
+      <li><i class="fas fa-check-circle"></i> 科学计算数据表格与对齐规范</li>
+      <li><i class="fas fa-check-circle"></i> 学术排版、脚注与 LaTeX 数学公式</li>
+    </ul>
+    <div class="portal-card-btn">
+      进入章节阅读 <i class="fas fa-arrow-right"></i>
+    </div>
+  </a>
+
+  <a href="/computational-physics/shell/" class="portal-card">
+    <div class="portal-card-header">
+      <span class="portal-card-badge">导航卡片 03</span>
+      <i class="fas fa-terminal portal-card-icon"></i>
+    </div>
+    <div class="portal-card-title">Linux Shell 常用命令与开发环境</div>
+    <div class="portal-card-desc">连接计算节点、管理海量数据与调度作业的基础命令与终端利器。</div>
+    <ul class="portal-card-list">
+      <li><i class="fas fa-check-circle"></i> Python/Conda 虚拟环境与镜像源</li>
+      <li><i class="fas fa-check-circle"></i> 目录文件高效导航与操作技巧</li>
+      <li><i class="fas fa-check-circle"></i> 压缩打包（tar.gz/zip/rar）</li>
+      <li><i class="fas fa-check-circle"></i> 环境变量、alias 别名与 Vim 指南</li>
+    </ul>
+    <div class="portal-card-btn">
+      进入章节阅读 <i class="fas fa-arrow-right"></i>
+    </div>
+  </a>
+
+  <a href="/computational-physics/ssh/" class="portal-card">
+    <div class="portal-card-header">
+      <span class="portal-card-badge">导航卡片 04</span>
+      <i class="fas fa-server portal-card-icon"></i>
+    </div>
+    <div class="portal-card-title">SSH 连接服务器与超算作业管理</div>
+    <div class="portal-card-desc">远程高性能计算集群连接规范、Linux 数据流重定向与 Slurm 负载均衡调度。</div>
+    <ul class="portal-card-list">
+      <li><i class="fas fa-check-circle"></i> OpenSSH 服务安装与远程安全连接</li>
+      <li><i class="fas fa-check-circle"></i> Linux 三大数据流与双重定向实战</li>
+      <li><i class="fas fa-check-circle"></i> 超算 Slurm 调度系统（sbatch/squeue/scancel）</li>
+      <li><i class="fas fa-check-circle"></i> nohup 后台静默运行与 tail 实时监控</li>
+    </ul>
+    <div class="portal-card-btn">
+      进入章节阅读 <i class="fas fa-arrow-right"></i>
+    </div>
+  </a>
+
+  <a href="/computational-physics/vasp/" class="portal-card">
+    <div class="portal-card-header">
+      <span class="portal-card-badge">导航卡片 05</span>
+      <i class="fas fa-atom portal-card-icon"></i>
+    </div>
+    <div class="portal-card-title">VASP 第一性原理能带计算工作流</div>
+    <div class="portal-card-desc">密度泛函理论材料模拟标准工作流，涵盖输入输出体系、收敛判据与进阶杂化泛函。</div>
+    <ul class="portal-card-list">
+      <li><i class="fas fa-check-circle"></i> POSCAR/INCAR/KPOINTS/POTCAR 四大文件体系</li>
+      <li><i class="fas fa-check-circle"></i> 计算收敛性与晶格受力状态检查指令</li>
+      <li><i class="fas fa-check-circle"></i> 经典 Si（硅）能带计算完整六步法</li>
+      <li><i class="fas fa-check-circle"></i> HSE06 杂化泛函进阶与 STOPCAR 安全终止</li>
+    </ul>
+    <div class="portal-card-btn">
+      进入章节阅读 <i class="fas fa-arrow-right"></i>
+    </div>
+  </a>
+
+  <a href="/computational-physics/code/" class="portal-card">
+    <div class="portal-card-header">
+      <span class="portal-card-badge">导航卡片 06</span>
+      <i class="fas fa-laptop-code portal-card-icon"></i>
+    </div>
+    <div class="portal-card-title">计算物理科学计算核心代码库</div>
+    <div class="portal-card-desc">物理模型数值仿真、微积分求解、微分动力学方程求解与数据拟合算法范式。</div>
+    <ul class="portal-card-list">
+      <li><i class="fas fa-check-circle"></i> MATLAB 数值微积分与符号方程求解</li>
+      <li><i class="fas fa-check-circle"></i> 常微分方程（ODE）求解与相空间矢量场</li>
+      <li><i class="fas fa-check-circle"></i> 三次样条插值与多项式最小二乘拟合</li>
+      <li><i class="fas fa-check-circle"></i> Python 向量化差分与刚性 ODE 欧拉法求解</li>
+    </ul>
+    <div class="portal-card-btn">
+      进入章节阅读 <i class="fas fa-arrow-right"></i>
+    </div>
+  </a>
+
+</div>
+
+<div class="page-nav-footer">
+  <a href="/" class="back-portal-btn"><i class="fas fa-home"></i> 返回博客首页</a>
+</div>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://lzhang202410-cpu.github.io">Liang Zhang</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://lzhang202410-cpu.github.io/2026/06/01/computational_physics/">https://lzhang202410-cpu.github.io/2026/06/01/computational_physics/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://lzhang202410-cpu.github.io" target="_blank">notebook</a>！</span></div></div><div class="tag_share"><div class="post-share"><div class="social-share" data-image="/img/sky.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/07/19/Condensed_matter_physics/" title="凝聚态物理理论基础"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">凝聚态物理理论基础</div></div><div class="info-2"><div class="info-item-1">本篇为凝聚态物理理论基础核心模块，系统性整合了固体物理理论基础（第一布里渊区作图步骤、二维正方与六角晶格高对称点、倒格矢计算与 Python 绘图）与电动力学核心推导（麦克斯韦方程组、波动方程与色散、达朗贝尔方程、狭义相对论时空观及旋光效应 GUI 实验）。</div></div></div></a><a class="pagination-related" href="/2026/05/18/research_experience/" title="科研历程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">科研历程</div></div><div class="info-2"><div class="info-item-1">记录第一性原理计算（DFT 自洽计算工作流程）、整体科研与计算技术路线图，以及利用朗道输运理论处理电子透射谱和声子透射谱数据。</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/sky.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Liang Zhang</div><div class="author-info-description">Balance study、research and life</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/lzhang202410-cpu"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的博客！这里记录物理、计算与技术的碰撞。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E7%89%A9%E7%90%86-%C2%B7-%E7%AB%A0%E8%8A%82%E5%AF%BC%E8%88%AA"><span class="toc-number">1.</span> <span class="toc-text">计算物理 · 章节导航</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/07/19/Condensed_matter_physics/" title="凝聚态物理理论基础">凝聚态物理理论基础</a><time datetime="2026-07-19T14:17:00.000Z" title="发表于 2026-07-19 22:17:00">2026-07-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/01/computational_physics/" title="计算物理">计算物理</a><time datetime="2026-06-01T04:00:00.000Z" title="发表于 2026-06-01 12:00:00">2026-06-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/18/research_experience/" title="科研历程">科研历程</a><time datetime="2026-05-18T12:00:00.000Z" title="发表于 2026-05-18 20:00:00">2026-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By Liang Zhang</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.0/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script src="/js/custom.js"></script></div></body></html>

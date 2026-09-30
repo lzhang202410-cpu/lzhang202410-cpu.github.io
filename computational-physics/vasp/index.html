@@ -1,0 +1,254 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>VASP 第一性原理能带计算工作流 | notebook</title><meta name="author" content="Liang Zhang"><meta name="copyright" content="Liang Zhang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="首页       计算物理       VASP 第一性原理能带计算工作流   VASP（Vienna Ab-initio Simulation Package）是基于密度泛函理论（DFT）进行材料电子结构与量子力学模拟的标准工业级软件包。本篇梳理了从基础输入输出、硅能带六步法、HSE06 杂化泛函到 STOPCAR 优雅退出的完整实战技术。  一、 VASP 核心输入输出文件体系1234">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VASP 第一性原理能带计算工作流">
+<meta property="og:url" content="https://lzhang202410-cpu.github.io/computational-physics/vasp/index.html">
+<meta property="og:site_name" content="notebook">
+<meta property="og:description" content="首页       计算物理       VASP 第一性原理能带计算工作流   VASP（Vienna Ab-initio Simulation Package）是基于密度泛函理论（DFT）进行材料电子结构与量子力学模拟的标准工业级软件包。本篇梳理了从基础输入输出、硅能带六步法、HSE06 杂化泛函到 STOPCAR 优雅退出的完整实战技术。  一、 VASP 核心输入输出文件体系1234">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lzhang202410-cpu.github.io/img/sky.png">
+<meta property="article:published_time" content="2026-06-01T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-30T04:12:31.049Z">
+<meta property="article:author" content="Liang Zhang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lzhang202410-cpu.github.io/img/sky.png"><script type="application/ld+json"></script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://lzhang202410-cpu.github.io/computational-physics/vasp/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'VASP 第一性原理能带计算工作流',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'page'
+}</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-color: #F2F6FC;"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/sky.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user-astronaut"></i><span> 关于</span></a></div></div></div></div><div class="page type-page" id="body-wrap"><header class="not-home-page fixed" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">notebook</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user-astronaut"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="page-site-info"><h1 id="site-title">VASP 第一性原理能带计算工作流</h1></div></header><main class="layout" id="content-inner"><div id="page"><div class="container" id="article-container"><div class="page-breadcrumb">
+  <a href="/"><i class="fas fa-home"></i> 首页</a>
+  <span class="sep"><i class="fas fa-chevron-right"></i></span>
+  <a href="/2026/06/01/computational_physics/"><i class="fas fa-microchip"></i> 计算物理</a>
+  <span class="sep"><i class="fas fa-chevron-right"></i></span>
+  <span class="current"><i class="fas fa-atom"></i> VASP 第一性原理能带计算工作流</span>
+</div>
+
+<p>VASP（Vienna Ab-initio Simulation Package）是基于密度泛函理论（DFT）进行材料电子结构与量子力学模拟的标准工业级软件包。本篇梳理了从基础输入输出、硅能带六步法、HSE06 杂化泛函到 STOPCAR 优雅退出的完整实战技术。</p>
+<hr>
+<h3 id="一、-VASP-核心输入输出文件体系"><a href="#一、-VASP-核心输入输出文件体系" class="headerlink" title="一、 VASP 核心输入输出文件体系"></a>一、 VASP 核心输入输出文件体系</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">计算作业目录/</span><br><span class="line">├── POSCAR       # 晶胞几何结构与原子分数/笛卡尔坐标</span><br><span class="line">├── INCAR        # 计算控制参数（截断能 ENCUT、泛函、自洽判据 EDIFF、算法）</span><br><span class="line">├── KPOINTS      # Brillouin 区 k 点网格采样策略 (Monkhorst-Pack / Gamma)</span><br><span class="line">└── POTCAR       # 赝势库文件（Projector-Augmented Wave, PAW）</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>结构优化输出</strong>：<code>OUTCAR</code>（核心输出日志）、<code>CONTCAR</code>（弛豫后最新晶格几何坐标）；</li>
+<li><strong>能带计算输入</strong>：追加静态自洽生成的全局电荷密度文件 <code>CHGCAR</code>；</li>
+<li><strong>能带计算输出</strong>：<code>BAND_GAP</code>（能隙大小与直接&#x2F;间接性质）、<code>band.dat</code>（能带色散数据）、<code>PROCAR</code>（各原子各轨道投影权重分量）。</li>
+</ul>
+<hr>
+<h3 id="二、-计算收敛性与晶格状态检查指令"><a href="#二、-计算收敛性与晶格状态检查指令" class="headerlink" title="二、 计算收敛性与晶格状态检查指令"></a>二、 计算收敛性与晶格状态检查指令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">grep reach OUTCAR        <span class="comment"># 检查是否达成自洽收敛判据 (reached required accuracy)</span></span><br><span class="line">grep sigma OUTCAR        <span class="comment"># 提取电子步与自由能演化情况</span></span><br><span class="line">grep forces OUTCAR       <span class="comment"># 检查原子最大残余受力情况是否小于预设阈值</span></span><br><span class="line"><span class="built_in">cat</span> CONTCAR              <span class="comment"># 对比原始 POSCAR 查看晶格畸变与弛豫后晶格常数</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="三、-经典-Si（硅）能带计算完整六步法"><a href="#三、-经典-Si（硅）能带计算完整六步法" class="headerlink" title="三、 经典 Si（硅）能带计算完整六步法"></a>三、 经典 Si（硅）能带计算完整六步法</h3><blockquote>
+<p><strong>核心原则</strong>：PBE 能带计算的核心是设置 <code>ICHARG = 11</code> 并直接沿用自洽生成的基态 <code>CHGCAR</code>。VASP 会固定全局自洽电荷密度，只在高对称 k 点路径上求解单电子本征方程，<strong>无需重复进行极耗时的自洽场迭代</strong>。</p>
+</blockquote>
+<ul>
+<li><strong>第一步：晶格结构优化（Relaxation）</strong>：优化晶格常数（实验值 <script type="math/tex">a = 5.431\ \text{Å}</script>），确认离子步与受力收敛；</li>
+<li><strong>第二步：静态自洽计算（SCF）</strong>：在密网格下生成基态电荷密度并拷贝波函数：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> WAVECAR ../band/ ; <span class="built_in">cp</span> CHGCAR ../band/</span><br></pre></td></tr></table></figure></li>
+<li><strong>第三步：非自洽能带参数设置</strong>：在 <code>band/INCAR</code> 中设定：<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">ICHARG</span> = <span class="number">11</span>   <span class="comment"># 非自洽计算，锁定 CHGCAR 电荷密度</span></span><br><span class="line"><span class="attr">IBRION</span> = -<span class="number">1</span>   <span class="comment"># 固定离子骨架，不进行弛豫</span></span><br><span class="line"><span class="attr">NSW</span>    = <span class="number">0</span>    <span class="comment"># 离子步数为 0</span></span><br><span class="line"><span class="attr">NBANDS</span> = <span class="number">16</span>   <span class="comment"># 确保完整覆盖导带</span></span><br><span class="line"><span class="attr">LORBIT</span> = <span class="number">11</span>   <span class="comment"># 输出 PROCAR 轨道投影</span></span><br></pre></td></tr></table></figure></li>
+<li><strong>第四步：高对称 k 点路径构建</strong>：利用 <code>vaspkit</code>（输入 <code>303</code> 或 <code>302</code>）生成闭合连续高对称路径 <code>KPATH.in</code>，并重命名为 <code>KPOINTS</code>；</li>
+<li><strong>第五步：多核并行提交作业</strong>：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mpirun -np 32 /opt/bin/vasp_std &gt; out.log 2&gt; err.log</span><br><span class="line"><span class="comment"># 或通过 sbatch run.bash 提交超算队列</span></span><br></pre></td></tr></table></figure></li>
+<li><strong>第六步：能带提取与可视化</strong>：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 运行 vaspkit，依次选择 21 (Band-Structure) -&gt; 211 (Plot Band)</span></span><br><span class="line"><span class="built_in">cat</span> BAND_GAP     <span class="comment"># 查看带隙性质与精确数值</span></span><br></pre></td></tr></table></figure>
+结合 Python（<code>matplotlib</code>）即可生成高精度能带色散曲线与投影态密度图（PDOS）。</li>
+</ul>
+<hr>
+<h3 id="四、-HSE06-杂化泛函能带计算进阶"><a href="#四、-HSE06-杂化泛函能带计算进阶" class="headerlink" title="四、 HSE06 杂化泛函能带计算进阶"></a>四、 HSE06 杂化泛函能带计算进阶</h3><p>标准 GGA-PBE 泛函由于自相互作用误差（Self-Interaction Error），存在系统性低估半导体带隙的问题。采用 HSE06 杂化泛函能够显著修正带隙，更接近实验观测值：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">LHFCALC</span> = .<span class="literal">TRUE</span>.     <span class="comment"># 启用 Hartree-Fock 杂化计算</span></span><br><span class="line"><span class="attr">HFSCREEN</span> = <span class="number">0.2</span>       <span class="comment"># 屏蔽长度参数 (HSE06 标准为 0.2 Å^-1)</span></span><br><span class="line"><span class="attr">AEXX</span>    = <span class="number">0.25</span>       <span class="comment"># 精确交换项混合比例 25%</span></span><br><span class="line"><span class="attr">ALGO</span>    = All        <span class="comment"># 杂化泛函必须采用共轭梯度或阻尼算法</span></span><br></pre></td></tr></table></figure>
+<p>使用 <code>vaspkit</code> 的 <code>25 -&gt; 251</code> 模块生成自洽均匀网格与高对称路径相结合的非加权混合 k 点。</p>
+<hr>
+<h3 id="五、-STOPCAR-优雅终止机制"><a href="#五、-STOPCAR-优雅终止机制" class="headerlink" title="五、 STOPCAR 优雅终止机制"></a>五、 STOPCAR 优雅终止机制</h3><p>当作业运行超时或需要中途微调参数时，若直接强行终止进程会导致 <code>CHGCAR</code> 与 <code>WAVECAR</code> 写入损坏。推荐采用 STOPCAR 优雅退出：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;LABORT = .TRUE.&quot;</span> &gt; STOPCAR</span><br></pre></td></tr></table></figure>
+<p>VASP 会在读取该信号后，在当前迭代离子步结束时自动执行规范的收尾存盘并正常退出，确保计算成果完好无损。</p>
+<div class="page-nav-footer">
+  <a href="/computational-physics/ssh/" class="back-portal-btn"><i class="fas fa-chevron-left"></i> 上一章：SSH 与超算管理</a>
+  <a href="/2026/06/01/computational_physics/" class="back-portal-btn"><i class="fas fa-microchip"></i> 返回 计算物理 聚合导航</a>
+  <a href="/computational-physics/code/" class="back-portal-btn">下一章：科学计算核心代码库 <i class="fas fa-chevron-right"></i></a>
+  <a href="/" class="back-portal-btn"><i class="fas fa-home"></i> 返回博客首页</a>
+</div>
+</div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/sky.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Liang Zhang</div><div class="author-info-description">Balance study、research and life</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/lzhang202410-cpu"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的博客！这里记录物理、计算与技术的碰撞。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81-VASP-%E6%A0%B8%E5%BF%83%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E6%96%87%E4%BB%B6%E4%BD%93%E7%B3%BB"><span class="toc-number">1.</span> <span class="toc-text">一、 VASP 核心输入输出文件体系</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E3%80%81-%E8%AE%A1%E7%AE%97%E6%94%B6%E6%95%9B%E6%80%A7%E4%B8%8E%E6%99%B6%E6%A0%BC%E7%8A%B6%E6%80%81%E6%A3%80%E6%9F%A5%E6%8C%87%E4%BB%A4"><span class="toc-number">2.</span> <span class="toc-text">二、 计算收敛性与晶格状态检查指令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E3%80%81-%E7%BB%8F%E5%85%B8-Si%EF%BC%88%E7%A1%85%EF%BC%89%E8%83%BD%E5%B8%A6%E8%AE%A1%E7%AE%97%E5%AE%8C%E6%95%B4%E5%85%AD%E6%AD%A5%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">三、 经典 Si（硅）能带计算完整六步法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E3%80%81-HSE06-%E6%9D%82%E5%8C%96%E6%B3%9B%E5%87%BD%E8%83%BD%E5%B8%A6%E8%AE%A1%E7%AE%97%E8%BF%9B%E9%98%B6"><span class="toc-number">4.</span> <span class="toc-text">四、 HSE06 杂化泛函能带计算进阶</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%94%E3%80%81-STOPCAR-%E4%BC%98%E9%9B%85%E7%BB%88%E6%AD%A2%E6%9C%BA%E5%88%B6"><span class="toc-number">5.</span> <span class="toc-text">五、 STOPCAR 优雅终止机制</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/07/19/Condensed_matter_physics/" title="凝聚态物理理论基础">凝聚态物理理论基础</a><time datetime="2026-07-19T14:17:00.000Z" title="发表于 2026-07-19 22:17:00">2026-07-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/01/computational_physics/" title="计算物理">计算物理</a><time datetime="2026-06-01T04:00:00.000Z" title="发表于 2026-06-01 12:00:00">2026-06-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/18/research_experience/" title="科研历程">科研历程</a><time datetime="2026-05-18T12:00:00.000Z" title="发表于 2026-05-18 20:00:00">2026-05-18</time></div></div></div></div><div class="card-widget card-categories"><div class="item-headline">
+            <i class="fas fa-folder-open"></i>
+            <span>分类</span>
+            
+          </div>
+          <ul class="card-category-list" id="aside-cat-list">
+            <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E7%89%A9%E7%90%86%E7%90%86%E8%AE%BA/"><span class="card-category-list-name">物理理论</span><span class="card-category-list-count">1</span></a><ul class="card-category-list child"><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E7%89%A9%E7%90%86%E7%90%86%E8%AE%BA/%E7%AC%94%E8%AE%B0/"><span class="card-category-list-name">笔记</span><span class="card-category-list-count">1</span></a></li></ul></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E7%BB%8F%E5%8E%86/"><span class="card-category-list-name">经历</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E8%AE%A1%E7%AE%97%E7%89%A9%E7%90%86/"><span class="card-category-list-name">计算物理</span><span class="card-category-list-count">1</span></a><ul class="card-category-list child"><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E8%AE%A1%E7%AE%97%E7%89%A9%E7%90%86/%E6%A0%B8%E5%BF%83%E6%8A%80%E8%83%BD/"><span class="card-category-list-name">核心技能</span><span class="card-category-list-count">1</span></a></li></ul></li>
+          </ul></div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站信息</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">3</div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2026-09-30T04:17:14.334Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By Liang Zhang</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.0/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script src="/js/custom.js"></script></div></body></html>
