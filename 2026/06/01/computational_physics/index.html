@@ -1,13 +1,13 @@
-<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>计算物理 | notebook</title><meta name="author" content="Liang Zhang"><meta name="copyright" content="Liang Zhang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="本篇为计算物理全流程技能栈与实战指南，涵盖 Hexo 博客搭建、Markdown 排版规范、Linux Shell 开发环境、SSH 与超算 Slurm 调度系统、VASP 硅能带六步法工作流及科学计算（MATLAB &amp; Python）核心算法代码库。">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>计算物理 | notebook</title><meta name="author" content="Liang Zhang"><meta name="copyright" content="Liang Zhang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="本篇为计算物理全流程技能栈与实战指南，涵盖 Hexo 博客搭建、Markdown 排版规范、Linux Shell 开发环境、SSH 与超算 Slurm 调度系统、VASP 硅能带六步法工作流、科学计算核心算法代码库及 COMSOL 多物理场热电器件数值仿真。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="计算物理">
 <meta property="og:url" content="https://lzhang202410-cpu.github.io/2026/06/01/computational_physics/index.html">
 <meta property="og:site_name" content="notebook">
-<meta property="og:description" content="本篇为计算物理全流程技能栈与实战指南，涵盖 Hexo 博客搭建、Markdown 排版规范、Linux Shell 开发环境、SSH 与超算 Slurm 调度系统、VASP 硅能带六步法工作流及科学计算（MATLAB &amp; Python）核心算法代码库。">
+<meta property="og:description" content="本篇为计算物理全流程技能栈与实战指南，涵盖 Hexo 博客搭建、Markdown 排版规范、Linux Shell 开发环境、SSH 与超算 Slurm 调度系统、VASP 硅能带六步法工作流、科学计算核心算法代码库及 COMSOL 多物理场热电器件数值仿真。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://lzhang202410-cpu.github.io/img/sky.png">
 <meta property="article:published_time" content="2026-06-01T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-09-30T04:16:47.303Z">
+<meta property="article:modified_time" content="2026-09-30T04:52:39.154Z">
 <meta property="article:author" content="Liang Zhang">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://lzhang202410-cpu.github.io/img/sky.png"><script type="application/ld+json">{
@@ -17,7 +17,7 @@
   "url": "https://lzhang202410-cpu.github.io/2026/06/01/computational_physics/",
   "image": "https://lzhang202410-cpu.github.io/img/sky.png",
   "datePublished": "2026-06-01T04:00:00.000Z",
-  "dateModified": "2026-09-30T04:16:47.303Z",
+  "dateModified": "2026-09-30T04:52:39.154Z",
   "author": [
     {
       "@type": "Person",
@@ -138,14 +138,15 @@
   isHighlightShrink: false,
   isToc: true,
   pageType: 'post'
-}</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-color: #F2F6FC;"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/sky.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user-astronaut"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">notebook</span></a><a class="nav-page-title" href="/"><span class="site-name">计算物理</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user-astronaut"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">计算物理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-01T04:00:00.000Z" title="发表于 2026-06-01 12:00:00">2026-06-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-30T04:16:47.303Z" title="更新于 2026-09-30 12:16:47">2026-09-30</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E7%89%A9%E7%90%86/">计算物理</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E7%89%A9%E7%90%86/%E6%A0%B8%E5%BF%83%E6%8A%80%E8%83%BD/">核心技能</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>本篇为<strong>计算物理</strong>全流程基本功与实战总结，系统梳理了从基础开发环境、代码工程到超算集群与第一性原理材料计算的核心技能栈：</p>
+}</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-color: #F2F6FC;"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/sky.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user-astronaut"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">notebook</span></a><a class="nav-page-title" href="/"><span class="site-name">计算物理</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user-astronaut"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">计算物理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-01T04:00:00.000Z" title="发表于 2026-06-01 12:00:00">2026-06-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-30T04:52:39.154Z" title="更新于 2026-09-30 12:52:39">2026-09-30</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E7%89%A9%E7%90%86/">计算物理</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E7%89%A9%E7%90%86/%E6%A0%B8%E5%BF%83%E6%8A%80%E8%83%BD/">核心技能</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>本篇为<strong>计算物理</strong>全流程基本功与实战总结，系统梳理了从基础开发环境、代码工程到超算集群、第一性原理与有限元仿真的核心技能栈：</p>
 <ul>
 <li><strong>Hexo 搭建个人博客教程</strong>：从 Node.js 运行引擎、Git 身份配置到 Hexo 站点初始化、常用指令速查及 GitHub Pages 一键自动化部署；</li>
 <li><strong>Markdown 语法规范与排版指南</strong>：系统整理学术笔记排版必备语法，涵盖标题样式、列表、表格与 LaTeX 公式；</li>
 <li><strong>Linux Shell 常用命令与开发环境</strong>：包含 Python&#x2F;Conda 虚拟环境、目录导航、打包解压、环境变量与 alias、流重定向及 Vim 全指南；</li>
 <li><strong>SSH 连接服务器与超算作业管理</strong>：解析 SSH 服务配置、Linux 三大数据流重定向、超算 Slurm 调度系统（sbatch&#x2F;squeue&#x2F;scancel）及后台实时监控；</li>
 <li><strong>VASP 第一性原理能带计算工作流</strong>：详述输入输出文件架构、收敛性判据、Si 能带六步法、HSE06 杂化泛函进阶与 STOPCAR 安全终止机制；</li>
-<li><strong>计算物理科学计算核心代码库</strong>：汇集 MATLAB 数值积分&#x2F;ODE相轨迹&#x2F;插值与 Python 欧拉法刚性方程求解核心代码。</li>
+<li><strong>计算物理科学计算核心代码库</strong>：汇集 MATLAB 数值积分&#x2F;ODE相轨迹&#x2F;插值与 Python 欧拉法刚性方程求解核心代码；</li>
+<li><strong>COMSOL 多物理场仿真经验总结</strong>：详解薄膜电导率稳态计算、电场&#x2F;电势&#x2F;温度梯度耦合场分析及 Micro-TEC 三维器件建模流程。</li>
 </ul>
 <span id="more"></span>
 
@@ -260,6 +261,24 @@
       <li><i class="fas fa-check-circle"></i> 常微分方程（ODE）求解与相空间矢量场</li>
       <li><i class="fas fa-check-circle"></i> 三次样条插值与多项式最小二乘拟合</li>
       <li><i class="fas fa-check-circle"></i> Python 向量化差分与刚性 ODE 欧拉法求解</li>
+    </ul>
+    <div class="portal-card-btn">
+      进入章节阅读 <i class="fas fa-arrow-right"></i>
+    </div>
+  </a>
+
+  <a href="/computational-physics/COMSOL/" class="portal-card">
+    <div class="portal-card-header">
+      <span class="portal-card-badge">导航卡片 07</span>
+      <i class="fas fa-cube portal-card-icon"></i>
+    </div>
+    <div class="portal-card-title">COMSOL 多物理场仿真与建模</div>
+    <div class="portal-card-desc">基于有限元法（FEM）的材料与热电器件数值模拟，涵盖电导率计算、场分布与 Micro-TEC。</div>
+    <ul class="portal-card-list">
+      <li><i class="fas fa-check-circle"></i> 薄膜结构稳态电导率与热电建模流程</li>
+      <li><i class="fas fa-check-circle"></i> 电势、切面电场模与轴向电势降分布</li>
+      <li><i class="fas fa-check-circle"></i> 表面温度场与热电势耦合响应（V-T）</li>
+      <li><i class="fas fa-check-circle"></i> Micro-TEC 三维器件模型与物性参数设定</li>
     </ul>
     <div class="portal-card-btn">
       进入章节阅读 <i class="fas fa-arrow-right"></i>

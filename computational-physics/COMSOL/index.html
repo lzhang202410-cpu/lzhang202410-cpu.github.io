@@ -1,0 +1,300 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>COMSOL 多物理场仿真与热电器件建模总结 | notebook</title><meta name="author" content="Liang Zhang"><meta name="copyright" content="Liang Zhang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="首页       计算物理       COMSOL 多物理场仿真与建模总结   COMSOL Multiphysics 是基于偏微分方程数值解（有限元法 FEM）的专业多物理场数值仿真平台。在热电材料与微型热电器件（Micro-TEC）的研究中，常涉及电场、温度场与热电效应（塞贝克效应、帕尔帖效应、汤姆逊效应）的强耦合求解。本篇梳理薄膜结构稳态电导率与热电性能计算、Micro-TEC 三">
+<meta property="og:type" content="website">
+<meta property="og:title" content="COMSOL 多物理场仿真与热电器件建模总结">
+<meta property="og:url" content="https://lzhang202410-cpu.github.io/computational-physics/COMSOL/index.html">
+<meta property="og:site_name" content="notebook">
+<meta property="og:description" content="首页       计算物理       COMSOL 多物理场仿真与建模总结   COMSOL Multiphysics 是基于偏微分方程数值解（有限元法 FEM）的专业多物理场数值仿真平台。在热电材料与微型热电器件（Micro-TEC）的研究中，常涉及电场、温度场与热电效应（塞贝克效应、帕尔帖效应、汤姆逊效应）的强耦合求解。本篇梳理薄膜结构稳态电导率与热电性能计算、Micro-TEC 三">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lzhang202410-cpu.github.io/img/sky.png">
+<meta property="article:published_time" content="2026-06-01T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-30T04:52:05.028Z">
+<meta property="article:author" content="Liang Zhang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lzhang202410-cpu.github.io/img/sky.png"><script type="application/ld+json"></script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://lzhang202410-cpu.github.io/computational-physics/COMSOL/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'COMSOL 多物理场仿真与热电器件建模总结',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'page'
+}</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-color: #F2F6FC;"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/sky.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user-astronaut"></i><span> 关于</span></a></div></div></div></div><div class="page type-page" id="body-wrap"><header class="not-home-page fixed" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">notebook</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user-astronaut"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="page-site-info"><h1 id="site-title">COMSOL 多物理场仿真与热电器件建模总结</h1></div></header><main class="layout" id="content-inner"><div id="page"><div class="container" id="article-container"><div class="page-breadcrumb">
+  <a href="/"><i class="fas fa-home"></i> 首页</a>
+  <span class="sep"><i class="fas fa-chevron-right"></i></span>
+  <a href="/2026/06/01/computational_physics/"><i class="fas fa-microchip"></i> 计算物理</a>
+  <span class="sep"><i class="fas fa-chevron-right"></i></span>
+  <span class="current"><i class="fas fa-cube"></i> COMSOL 多物理场仿真与建模总结</span>
+</div>
+
+<p>COMSOL Multiphysics 是基于偏微分方程数值解（有限元法 FEM）的专业多物理场数值仿真平台。在热电材料与微型热电器件（Micro-TEC）的研究中，常涉及电场、温度场与热电效应（塞贝克效应、帕尔帖效应、汤姆逊效应）的强耦合求解。本篇梳理薄膜结构稳态电导率与热电性能计算、Micro-TEC 三维建模要点及仿真结果分析。</p>
+<hr>
+<h2 id="一、-案例一：薄膜结构稳态电导率与热电多物理场计算"><a href="#一、-案例一：薄膜结构稳态电导率与热电多物理场计算" class="headerlink" title="一、 案例一：薄膜结构稳态电导率与热电多物理场计算"></a>一、 案例一：薄膜结构稳态电导率与热电多物理场计算</h2><h3 id="1-建模与仿真全流程"><a href="#1-建模与仿真全流程" class="headerlink" title="1. 建模与仿真全流程"></a>1. 建模与仿真全流程</h3><ol>
+<li><strong>建立几何模型</strong>：<ul>
+<li>方式一：建立二维截面几何结构，通过拉伸（Extrude）生成三维立体模型；</li>
+<li>方式二：直接在三维空间中构建薄膜与电极几何实体。</li>
+</ul>
+</li>
+<li><strong>选择物理场模块</strong>：<ul>
+<li>电导率研究：选择 <strong>电流模块 (Electric Currents, ec)</strong>；</li>
+<li>热电耦合研究：选择 <strong>热电效应多物理场接口 (Thermoelectricity)</strong>，耦合电流与固体传热模块。</li>
+</ul>
+</li>
+<li><strong>选择研究类型</strong>：<ul>
+<li>根据实验与测试工况选择 <strong>稳态 (Stationary)</strong> 或 <strong>瞬态 &#x2F; 频域 (Time Dependent)</strong>。</li>
+</ul>
+</li>
+<li><strong>参数与边界条件设置</strong>：<ul>
+<li><strong>全局参数</strong>：预设几何尺度（长度 <script type="math/tex">L</script>、截面积 <script type="math/tex">A</script>）、输入电流 <script type="math/tex">I</script> 或电势差 <script type="math/tex">V</script>、环境温度等参数；</li>
+<li><strong>材料属性赋值</strong>：选定对应计算域，输入电导率 <script type="math/tex">\sigma</script>、热导率 <script type="math/tex">\kappa</script>、塞贝克系数 <script type="math/tex">S</script> 等参数（依据文献或第一性原理&#x2F;实验测量数据）；</li>
+<li><strong>泛定方程与边界条件</strong>：设定电绝缘边界、接地端（Ground）、指定电势&#x2F;电流注入边界、热边界（恒温或绝热）；</li>
+<li><strong>探针（Domain&#x2F;Boundary Probes）设置</strong>：在关注的关键截面或轴线上配置电压、温度探针，实时提取数值结果。</li>
+</ul>
+</li>
+<li><strong>网格剖分与求解</strong>：<ul>
+<li>对电势梯度与温度梯度变化剧烈区域（如接触边界层）进行网格局部细化，执行自洽稳态求解。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="2-计算结果展示与场分布分析"><a href="#2-计算结果展示与场分布分析" class="headerlink" title="2. 计算结果展示与场分布分析"></a>2. 计算结果展示与场分布分析</h3><p>在给定两端电势差或温差驱动下，薄膜与器件内部的电势分布、电场强度梯度、沿轴向电势降落以及电势-温度耦合曲线如下所示：</p>
+<h4 id="1-体电势三维空间分布"><a href="#1-体电势三维空间分布" class="headerlink" title="(1) 体电势三维空间分布"></a>(1) 体电势三维空间分布</h4><p>在稳态电流场驱动下，薄膜结构内部建立连续平滑的电势梯度分布：</p>
+<div style="text-align: center; margin: 1.5rem 0;">
+  <img src="/img/Voltage.png" alt="体电势分布 (V)" style="max-width: 85%; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);">
+  <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">图 1：薄膜器件三维体电势分布（Colorbar 表示电势大小，单位：V）</p>
+</div>
+
+<h4 id="2-多切面电场模分布"><a href="#2-多切面电场模分布" class="headerlink" title="(2) 多切面电场模分布"></a>(2) 多切面电场模分布</h4><p>通过三维截面切片，观察内部电场强度模值 <script type="math/tex">|\mathbf{E}|</script> 的均匀性与边缘效应分布：</p>
+<div style="text-align: center; margin: 1.5rem 0;">
+  <img src="/img/Voltage_norm.png" alt="多切面电场模 (V/m)" style="max-width: 85%; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);">
+  <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">图 2：内部多切面电场模分布（单位：V/m）</p>
+</div>
+
+<h4 id="3-沿器件轴向弧长的电势降分布"><a href="#3-沿器件轴向弧长的电势降分布" class="headerlink" title="(3) 沿器件轴向弧长的电势降分布"></a>(3) 沿器件轴向弧长的电势降分布</h4><p>沿器件主轴提取的一维探针线结果表明，电势沿长度方向呈现高度线性的均匀压降，符合一维欧姆定律与稳态传导特征：</p>
+<div style="text-align: center; margin: 1.5rem 0;">
+  <img src="/img/Voltage_length.png" alt="线结果图：电势沿弧长分布" style="max-width: 85%; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);">
+  <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">图 3：沿中心轴向弧长的电势分布曲线</p>
+</div>
+
+<h4 id="4-表面温度梯度三维分布"><a href="#4-表面温度梯度三维分布" class="headerlink" title="(4) 表面温度梯度三维分布"></a>(4) 表面温度梯度三维分布</h4><p>在热电效应或两端控温边界下，器件建立稳定的冷热端温度场梯度：</p>
+<div style="text-align: center; margin: 1.5rem 0;">
+  <img src="/img/T_distribution.png" alt="表面温度分布 (K)" style="max-width: 85%; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);">
+  <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">图 4：器件表面温度分布（单位：K）</p>
+</div>
+
+<h4 id="5-电势与温度耦合特征曲线-V-T"><a href="#5-电势与温度耦合特征曲线-V-T" class="headerlink" title="(5) 电势与温度耦合特征曲线 (V-T)"></a>(5) 电势与温度耦合特征曲线 (V-T)</h4><p>利用热电效应探针提取电势与温度对应关系，反映出塞贝克效应产生的热电势与温度梯度的强相关响应：</p>
+<div style="text-align: center; margin: 1.5rem 0;">
+  <img src="/img/V-T.png" alt="线结果图：电势随温度变化曲线" style="max-width: 85%; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);">
+  <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">图 5：沿温度梯度的热生电势响应特征曲线 (V-T)</p>
+</div>
+
+<hr>
+<h2 id="二、-案例二：Micro-TEC-三维模型"><a href="#二、-案例二：Micro-TEC-三维模型" class="headerlink" title="二、 案例二：Micro-TEC 三维模型"></a>二、 案例二：Micro-TEC 三维模型</h2><p>微型热电制冷器（Micro-Thermoelectric Cooler, Micro-TEC）通过帕尔帖效应在微米尺度实现主动制冷与局部精准温控：</p>
+<ol>
+<li><strong>建立三维几何模型</strong>：<ul>
+<li>构建多电偶对结构（包含 P 型支臂、N 型支臂、金属连接铜片、上下绝缘导热基板）；</li>
+<li>参数化定义支臂截面积比 <script type="math/tex">A_p/A_n</script>、支臂高度 <script type="math/tex">H</script> 以及填料间隙。</li>
+</ul>
+</li>
+<li><strong>设置材料物性与温变函数</strong>：<ul>
+<li>选定对应域，输入 P&#x2F;N 支臂随温度变化的材料特征参数 <script type="math/tex">S(T), \sigma(T), \kappa(T)</script>；</li>
+<li>考虑接触电阻（Contact Resistance）与接触热阻对微米器件性能的关键影响。</li>
+</ul>
+</li>
+<li><strong>设置热电多物理场边界条件</strong>：<ul>
+<li>热端边界：设定自然对流散热或固定恒温汇 <script type="math/tex">T_h</script>；</li>
+<li>冷端边界：施加制冷面负载热流密度 <script type="math/tex">Q_c</script>；</li>
+<li>电气边界：输入指定直流电流 <script type="math/tex">I_{in}</script>，通过参数化扫描（Parametric Sweep）求解最大制冷温差 <script type="math/tex">\Delta T_{max}</script> 与制冷性能系数 <script type="math/tex">\mathrm{COP}</script>。</li>
+</ul>
+</li>
+</ol>
+<div class="page-nav-footer">
+  <a href="/computational-physics/code/" class="back-portal-btn"><i class="fas fa-chevron-left"></i> 上一章：科学计算核心代码库</a>
+  <a href="/2026/06/01/computational_physics/" class="back-portal-btn"><i class="fas fa-microchip"></i> 返回 计算物理 聚合导航</a>
+  <a href="/" class="back-portal-btn"><i class="fas fa-home"></i> 返回博客首页</a>
+</div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/sky.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Liang Zhang</div><div class="author-info-description">Balance study、research and life</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/lzhang202410-cpu"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的博客！这里记录物理、计算与技术的碰撞。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81-%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E8%96%84%E8%86%9C%E7%BB%93%E6%9E%84%E7%A8%B3%E6%80%81%E7%94%B5%E5%AF%BC%E7%8E%87%E4%B8%8E%E7%83%AD%E7%94%B5%E5%A4%9A%E7%89%A9%E7%90%86%E5%9C%BA%E8%AE%A1%E7%AE%97"><span class="toc-number">1.</span> <span class="toc-text">一、 案例一：薄膜结构稳态电导率与热电多物理场计算</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%BB%BA%E6%A8%A1%E4%B8%8E%E4%BB%BF%E7%9C%9F%E5%85%A8%E6%B5%81%E7%A8%8B"><span class="toc-number">1.1.</span> <span class="toc-text">1. 建模与仿真全流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E8%AE%A1%E7%AE%97%E7%BB%93%E6%9E%9C%E5%B1%95%E7%A4%BA%E4%B8%8E%E5%9C%BA%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90"><span class="toc-number">1.2.</span> <span class="toc-text">2. 计算结果展示与场分布分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E4%BD%93%E7%94%B5%E5%8A%BF%E4%B8%89%E7%BB%B4%E7%A9%BA%E9%97%B4%E5%88%86%E5%B8%83"><span class="toc-number">1.2.1.</span> <span class="toc-text">(1) 体电势三维空间分布</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E5%A4%9A%E5%88%87%E9%9D%A2%E7%94%B5%E5%9C%BA%E6%A8%A1%E5%88%86%E5%B8%83"><span class="toc-number">1.2.2.</span> <span class="toc-text">(2) 多切面电场模分布</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E6%B2%BF%E5%99%A8%E4%BB%B6%E8%BD%B4%E5%90%91%E5%BC%A7%E9%95%BF%E7%9A%84%E7%94%B5%E5%8A%BF%E9%99%8D%E5%88%86%E5%B8%83"><span class="toc-number">1.2.3.</span> <span class="toc-text">(3) 沿器件轴向弧长的电势降分布</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E8%A1%A8%E9%9D%A2%E6%B8%A9%E5%BA%A6%E6%A2%AF%E5%BA%A6%E4%B8%89%E7%BB%B4%E5%88%86%E5%B8%83"><span class="toc-number">1.2.4.</span> <span class="toc-text">(4) 表面温度梯度三维分布</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-%E7%94%B5%E5%8A%BF%E4%B8%8E%E6%B8%A9%E5%BA%A6%E8%80%A6%E5%90%88%E7%89%B9%E5%BE%81%E6%9B%B2%E7%BA%BF-V-T"><span class="toc-number">1.2.5.</span> <span class="toc-text">(5) 电势与温度耦合特征曲线 (V-T)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81-%E6%A1%88%E4%BE%8B%E4%BA%8C%EF%BC%9AMicro-TEC-%E4%B8%89%E7%BB%B4%E6%A8%A1%E5%9E%8B"><span class="toc-number">2.</span> <span class="toc-text">二、 案例二：Micro-TEC 三维模型</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/07/19/Condensed_matter_physics/" title="凝聚态物理理论基础">凝聚态物理理论基础</a><time datetime="2026-07-19T14:17:00.000Z" title="发表于 2026-07-19 22:17:00">2026-07-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/01/computational_physics/" title="计算物理">计算物理</a><time datetime="2026-06-01T04:00:00.000Z" title="发表于 2026-06-01 12:00:00">2026-06-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/18/research_experience/" title="科研历程">科研历程</a><time datetime="2026-05-18T12:00:00.000Z" title="发表于 2026-05-18 20:00:00">2026-05-18</time></div></div></div></div><div class="card-widget card-categories"><div class="item-headline">
+            <i class="fas fa-folder-open"></i>
+            <span>分类</span>
+            
+          </div>
+          <ul class="card-category-list" id="aside-cat-list">
+            <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E7%89%A9%E7%90%86%E7%90%86%E8%AE%BA/"><span class="card-category-list-name">物理理论</span><span class="card-category-list-count">1</span></a><ul class="card-category-list child"><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E7%89%A9%E7%90%86%E7%90%86%E8%AE%BA/%E7%AC%94%E8%AE%B0/"><span class="card-category-list-name">笔记</span><span class="card-category-list-count">1</span></a></li></ul></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E7%BB%8F%E5%8E%86/"><span class="card-category-list-name">经历</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E8%AE%A1%E7%AE%97%E7%89%A9%E7%90%86/"><span class="card-category-list-name">计算物理</span><span class="card-category-list-count">1</span></a><ul class="card-category-list child"><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E8%AE%A1%E7%AE%97%E7%89%A9%E7%90%86/%E6%A0%B8%E5%BF%83%E6%8A%80%E8%83%BD/"><span class="card-category-list-name">核心技能</span><span class="card-category-list-count">1</span></a></li></ul></li>
+          </ul></div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站信息</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">3</div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2026-09-30T04:52:57.053Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By Liang Zhang</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.0/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script src="/js/custom.js"></script></div></body></html>
