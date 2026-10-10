@@ -7,7 +7,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://lzhang202410-cpu.github.io/img/sky.png">
 <meta property="article:published_time" content="2026-06-01T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-09-30T04:52:05.028Z">
+<meta property="article:modified_time" content="2026-10-10T13:44:42.563Z">
 <meta property="article:author" content="Liang Zhang">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://lzhang202410-cpu.github.io/img/sky.png"><script type="application/ld+json"></script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://lzhang202410-cpu.github.io/computational-physics/COMSOL/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
@@ -212,18 +212,234 @@
 </ul>
 </li>
 </ol>
+<h2 id="Antigravity-Python-mph"><a href="#Antigravity-Python-mph" class="headerlink" title="Antigravity+Python + mph"></a>Antigravity+Python + mph</h2><p><strong>基本原理</strong><br>通过 Python 的开源第三方库 mph，可以直接通过 Java API 深入操控 COMSOL（修改任意参数、网格、边界条件、求解、提取场数据、生成图片）。<br>在本次热电冷却器件（TEC&#x2F;TEM，即 Thermoelectric Module）仿真中，用到的参数可以归纳为 <strong>几何尺寸参数</strong>、<strong>材料物性参数</strong>、<strong>工况&#x2F;边界条件参数</strong> 和 <strong>求解性能输出参数</strong> 四大类：</p>
+<hr>
+<h3 id="一、-几何尺寸参数（Geometric-Parameters）"><a href="#一、-几何尺寸参数（Geometric-Parameters）" class="headerlink" title="一、 几何尺寸参数（Geometric Parameters）"></a>一、 几何尺寸参数（Geometric Parameters）</h3><p>定义在模型脚本的全局参数表中：</p>
+<table>
+<thead>
+<tr>
+<th align="left">参数变量</th>
+<th align="left">默认设定值</th>
+<th align="left">物理含义与作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>w_leg</code></td>
+<td align="left"><code>1.4 [mm]</code></td>
+<td align="left">P&#x2F;N 型热电臂截面宽度（X 方向）</td>
+</tr>
+<tr>
+<td align="left"><code>d_leg</code></td>
+<td align="left"><code>1.4 [mm]</code></td>
+<td align="left">P&#x2F;N 型热电臂截面深度（Y 方向）</td>
+</tr>
+<tr>
+<td align="left"><code>h_leg</code></td>
+<td align="left"><code>2.0 [mm]</code></td>
+<td align="left">P&#x2F;N 型热电臂高度（Z 方向，决定热阻与电阻）</td>
+</tr>
+<tr>
+<td align="left"><code>gap</code></td>
+<td align="left"><code>0.6 [mm]</code></td>
+<td align="left">P 臂与 N 臂之间的间隙距离</td>
+</tr>
+<tr>
+<td align="left"><code>t_cu</code></td>
+<td align="left"><code>0.3 [mm]</code></td>
+<td align="left">顶部导电铜桥及底部铜电极片厚度</td>
+</tr>
+<tr>
+<td align="left"><code>t_cer</code></td>
+<td align="left"><code>0.5 [mm]</code></td>
+<td align="left">顶部冷端与底部热端氧化铝（<script type="math/tex">\text{Al}_2\text{O}_3</script>）陶瓷基板厚度</td>
+</tr>
+<tr>
+<td align="left"><code>margin</code></td>
+<td align="left"><code>0.5 [mm]</code></td>
+<td align="left">陶瓷基板相对电极外边缘的富余外扩边界</td>
+</tr>
+<tr>
+<td align="left"><code>w_cer</code></td>
+<td align="left"><code>4.4 [mm]</code></td>
+<td align="left"><em>(派生)</em> 陶瓷基板总宽度（<script type="math/tex">= 2 \times w_{leg} + gap + 2 \times margin</script>）</td>
+</tr>
+<tr>
+<td align="left"><code>d_cer</code></td>
+<td align="left"><code>2.4 [mm]</code></td>
+<td align="left"><em>(派生)</em> 陶瓷基板总深度（<script type="math/tex">= d_{leg} + 2 \times margin</script>）</td>
+</tr>
+<tr>
+<td align="left"><code>z_total</code></td>
+<td align="left"><code>3.6 [mm]</code></td>
+<td align="left"><em>(派生)</em> 器件总叠层厚度（<script type="math/tex">= 2 \times t_{cer} + 2 \times t_{cu} + h_{leg}</script>）</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="二、-材料物理特性参数（Material-Properties）"><a href="#二、-材料物理特性参数（Material-Properties）" class="headerlink" title="二、 材料物理特性参数（Material Properties）"></a>二、 材料物理特性参数（Material Properties）</h3><p>热电耦合（<code>ht</code> + <code>ec</code> + <code>tee1</code> + <code>emh1</code>）所必需的本构参数：</p>
+<table>
+<thead>
+<tr>
+<th align="left">材料部件</th>
+<th align="left">塞贝克系数 <script type="math/tex">S</script> (<script type="math/tex">\text{V/K}</script>)</th>
+<th align="left">电导率 <script type="math/tex">\sigma</script> (<script type="math/tex">\text{S/m}</script>)</th>
+<th align="left">热导率 <script type="math/tex">k</script> (<script type="math/tex">\text{W/(m}\cdot\text{K)}</script>)</th>
+<th align="left">密度 <script type="math/tex">\rho</script> (<script type="math/tex">\text{kg/m}^3</script>)</th>
+<th align="left">比热容 <script type="math/tex">C_p</script> (<script type="math/tex">\text{J/(kg}\cdot\text{K)}</script>)</th>
+<th align="left">作用机理</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>P 型 <script type="math/tex">\text{Bi}_2\text{Te}_3</script></strong></td>
+<td align="left"><script type="math/tex">+2.0 \times 10^{-4}</script> (<script type="math/tex">+200\ \mu\text{V/K}</script>)</td>
+<td align="left"><script type="math/tex">1.1 \times 10^5</script></td>
+<td align="left"><script type="math/tex">1.6</script></td>
+<td align="left"><script type="math/tex">7740</script></td>
+<td align="left"><script type="math/tex">154.4</script></td>
+<td align="left">正塞贝克系数，空穴载流子迁移吸热</td>
+</tr>
+<tr>
+<td align="left"><strong>N 型 <script type="math/tex">\text{Bi}_2\text{Te}_3</script></strong></td>
+<td align="left"><script type="math/tex">-2.0 \times 10^{-4}</script> (<script type="math/tex">-200\ \mu\text{V/K}</script>)</td>
+<td align="left"><script type="math/tex">1.1 \times 10^5</script></td>
+<td align="left"><script type="math/tex">1.6</script></td>
+<td align="left"><script type="math/tex">7740</script></td>
+<td align="left"><script type="math/tex">154.4</script></td>
+<td align="left">负塞贝克系数，电子载流子迁移吸热</td>
+</tr>
+<tr>
+<td align="left"><strong>紫铜导电片</strong></td>
+<td align="left"><script type="math/tex">+6.5 \times 10^{-6}</script> (<script type="math/tex">+6.5\ \mu\text{V/K}</script>)</td>
+<td align="left"><script type="math/tex">5.998 \times 10^7</script></td>
+<td align="left"><script type="math/tex">400</script></td>
+<td align="left"><script type="math/tex">8960</script></td>
+<td align="left"><script type="math/tex">385</script></td>
+<td align="left">高导电、高导热电极桥接</td>
+</tr>
+<tr>
+<td align="left"><strong>氧化铝陶瓷基板</strong></td>
+<td align="left"><script type="math/tex">0</script></td>
+<td align="left"><script type="math/tex">1.0 \times 10^{-12}</script></td>
+<td align="left"><script type="math/tex">27</script></td>
+<td align="left"><script type="math/tex">3900</script></td>
+<td align="left"><script type="math/tex">900</script></td>
+<td align="left">电气绝缘、表面导热均温</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="三、-工况与边界条件参数（Operational-Conditions）"><a href="#三、-工况与边界条件参数（Operational-Conditions）" class="headerlink" title="三、 工况与边界条件参数（Operational Conditions）"></a>三、 工况与边界条件参数（Operational Conditions）</h3><p>用于控制求解状态与测试环境：</p>
+<table>
+<thead>
+<tr>
+<th align="left">参数变量</th>
+<th align="left">默认设定值</th>
+<th align="left">物理含义与设定方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>T_hot</code></td>
+<td align="left"><code>293.15 [K]</code> (<script type="math/tex">20.0^\circ\text{C}</script>)</td>
+<td align="left">热端散热基板底部固定的散热器&#x2F;水冷温度</td>
+</tr>
+<tr>
+<td align="left"><code>I_in</code></td>
+<td align="left"><code>1.8 [A]</code></td>
+<td align="left">施加在 N 臂底部电极的直流恒流工作电流（终端 Terminal）</td>
+</tr>
+<tr>
+<td align="left"><code>V_gnd</code></td>
+<td align="left"><code>0 [V]</code></td>
+<td align="left">施加在 P 臂底部电极的接地参考电位（Ground）</td>
+</tr>
+<tr>
+<td align="left"><code>Q_cold</code></td>
+<td align="left"><code>0 [W]</code></td>
+<td align="left">冷端表面的热负载功率（设为 0 时测试器件极限最大温差 <script type="math/tex">\Delta T_{max}</script>）</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="四、-关键性能输出参数（Performance-Metrics）"><a href="#四、-关键性能输出参数（Performance-Metrics）" class="headerlink" title="四、 关键性能输出参数（Performance Metrics）"></a>四、 关键性能输出参数（Performance Metrics）</h3><p>求解后由后处理节点自动计算评估的核心结果：</p>
+<table>
+<thead>
+<tr>
+<th align="left">输出变量</th>
+<th align="left">本次求解数值</th>
+<th align="left">单位</th>
+<th align="left">物理意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><script type="math/tex">V_{term}</script></td>
+<td align="left"><strong><script type="math/tex">0.0523</script></strong></td>
+<td align="left"><script type="math/tex">\text{V}</script></td>
+<td align="left">单热电偶对总端电压（包含内阻压降与反塞贝克电动势）</td>
+</tr>
+<tr>
+<td align="left"><script type="math/tex">P_{in}</script></td>
+<td align="left"><strong><script type="math/tex">0.0941</script></strong></td>
+<td align="left"><script type="math/tex">\text{W}</script></td>
+<td align="left">消耗的输入电功率（<script type="math/tex">= V_{term} \times I_{in}</script>）</td>
+</tr>
+<tr>
+<td align="left"><script type="math/tex">T_{cold\_min}</script></td>
+<td align="left"><strong><script type="math/tex">-26.67</script></strong></td>
+<td align="left"><script type="math/tex">^\circ\text{C}</script></td>
+<td align="left">顶部冷板表面的最低温度</td>
+</tr>
+<tr>
+<td align="left"><script type="math/tex">T_{hot}</script></td>
+<td align="left"><strong><script type="math/tex">20.00</script></strong></td>
+<td align="left"><script type="math/tex">^\circ\text{C}</script></td>
+<td align="left">底部热板最高基准温度</td>
+</tr>
+<tr>
+<td align="left"><script type="math/tex">\Delta T_{max}</script></td>
+<td align="left"><strong><script type="math/tex">46.67</script></strong></td>
+<td align="left"><script type="math/tex">\text{K}</script> &#x2F; <script type="math/tex">^\circ\text{C}</script></td>
+<td align="left">极限最大制冷温差（<script type="math/tex">= T_{hot} - T_{cold\_min}</script>）</td>
+</tr>
+</tbody></table>
+<h4 id="仿真计算"><a href="#仿真计算" class="headerlink" title="仿真计算"></a>仿真计算</h4><p>基于上述参数配置（<script type="math/tex">I_{in} = 1.8\ \mathrm{A}</script>，<script type="math/tex">T_{hot} = 293.15\ \mathrm{K}</script>，<script type="math/tex">Q_{cold} = 0\ \mathrm{W}</script>），COMSOL 稳态求解后输出如下两幅关键云图：</p>
+<h5 id="①-三维体电势分布"><a href="#①-三维体电势分布" class="headerlink" title="① 三维体电势分布"></a>① 三维体电势分布</h5><div style="text-align: center; margin: 1.5rem 0;">
+  <img src="/img/tec_Potential_3d.png" alt="Micro-TEC 三维电势分布 (V)" style="max-width: 88%; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.10);">
+  <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">图：Micro-TEC 器件三维体电势分布（Colorbar 单位：×10⁻³ V，最大值 ≈ 52.3 mV）</p>
+</div>
+
+<p><strong>场分布解读：</strong></p>
+<ul>
+<li><strong>高电位端（深红色，<script type="math/tex">\sim 52\ \mathrm{mV}</script>）</strong>：位于 N 型支臂底部入流电极（Terminal 端），对应仿真参数 <code>I_in = 1.8 A</code> 的注入点，电势最高。</li>
+<li><strong>低电位端（深蓝色，<script type="math/tex">\sim 0\ \mathrm{V}</script>）</strong>：位于 P 型支臂底部接地电极（Ground 端，<code>V_gnd = 0 V</code>），电势最低。</li>
+<li><strong>顶部铜桥（绿色，<script type="math/tex">\sim 25\text{–}35\ \mathrm{mV}</script>）</strong>：铜片电导率高达 <script type="math/tex">\sigma_{Cu} = 5.998 \times 10^7\ \mathrm{S/m}</script>，内阻极小，跨铜桥的压降不足 1 mV，呈现近等势体特征，印证了表中紫铜参数设置的合理性。</li>
+<li><strong>支臂轴向线性压降</strong>：P&#x2F;N 型 <script type="math/tex">\text{Bi}_2\text{Te}_3</script> 支臂（<script type="math/tex">\sigma = 1.1 \times 10^5\ \mathrm{S/m}</script>）承担主要电阻压降，颜色沿 Z 轴连续渐变，分布均匀，与单向稳态电流模型一致；单臂理论电阻约 <script type="math/tex">R_{arm} = \frac{h_{leg}}{\sigma \cdot w_{leg} \cdot d_{leg}} \approx 0.0091\ \Omega</script>，两臂串联内阻 <script type="math/tex">R_{int} \approx 0.018\ \Omega</script>，验证了仿真端电压 <script type="math/tex">V_{term} = 52.3\ \mathrm{mV}</script> 量级的自洽性。</li>
+<li><strong>截面等势均匀性</strong>：相同 Z 高度的横截面颜色均匀，说明截面内无横向电流分量，满足一维均匀导电假设。</li>
+</ul>
+<h5 id="②-三维温度场分布"><a href="#②-三维温度场分布" class="headerlink" title="② 三维温度场分布"></a>② 三维温度场分布</h5><div style="text-align: center; margin: 1.5rem 0;">
+  <img src="/img/tec_temperature_3d.png" alt="Micro-TEC 三维温度分布" style="max-width: 88%; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.10);">
+  <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">图：Micro-TEC 器件三维温度场分布（顶部冷端金黄色，底部热端深紫色；<script type="math/tex">\Delta T_{max} = 46.67\ \mathrm{K}</script>）</p>
+</div>
+
+<p><strong>场分布解读：</strong></p>
+<ul>
+<li><strong>热端（深紫色，<script type="math/tex">T_{hot} = 20.00\ ^{\circ}\mathrm{C}</script>）</strong>：底部氧化铝陶瓷基板施加固定温度边界，对应仿真参数 <code>T_hot = 293.15 K</code>，色调最深，为器件散热侧。</li>
+<li><strong>冷端（金黄色，<script type="math/tex">T_{cold} = -26.67\ ^{\circ}\mathrm{C}</script>）</strong>：顶部陶瓷基板因帕尔帖效应主动抽热而达到最低温，实现极限制冷温差 <script type="math/tex">\Delta T_{max} = 46.67\ \mathrm{K}</script>（<script type="math/tex">Q_{cold} = 0</script> 空载条件）。</li>
+<li><strong>支臂温度梯度</strong>：P&#x2F;N 型 <script type="math/tex">\text{Bi}_2\text{Te}_3</script> 支臂（热导率 <script type="math/tex">\kappa = 1.6\ \mathrm{W/(m \cdot K)}</script>）颜色从上部金黄向下部深紫连续过渡，轴向热流密度 <script type="math/tex">q_z \approx \kappa \cdot \Delta T / h_{leg} = 1.6 \times 46.67 / 0.002 \approx 37.3\ \mathrm{kW/m^2}</script>，与帕尔帖制冷强度相符。</li>
+<li><strong>铜桥顶部高温局域</strong>：铜桥高热导率（<script type="math/tex">k_{Cu} = 400\ \mathrm{W/(m \cdot K)}</script>）使顶部等温均匀，但因帕尔帖效应的热量在 P-N 结处以 <script type="math/tex">Q_h = S \cdot I \cdot T_h</script> 形式持续泵入，导致顶部实际为低温端——这与制冷器物理相符（制冷面在上、散热面在下）。</li>
+<li><strong>对称性与均匀性</strong>：左右两支臂温度分布高度对称，与 <code>w_leg = d_leg = 1.4 mm</code> 等几何对称设置及相同材料参数（P&#x2F;N 型同值 <script type="math/tex">\sigma, \kappa</script>）完全一致，验证了模型构建的正确性。</li>
+</ul>
+<blockquote>
+<p><strong>综合结论</strong>：电势云图揭示了串联回路中支臂主导电阻压降的分配规律；温度云图直观呈现了帕尔帖效应驱动的冷热端梯度建立过程。两者共同确认了本次仿真在 <script type="math/tex">I_{in} = 1.8\ \mathrm{A}</script> 工况下的核心输出：<strong>输入功率 <script type="math/tex">P_{in} = 0.0941\ \mathrm{W}</script>，极限制冷温差 <script type="math/tex">\Delta T_{max} = 46.67\ \mathrm{K}</script></strong>，为后续帕拉米特扫描与多目标优化（最大 <script type="math/tex">\Delta T</script> &#x2F; 最优 <script type="math/tex">\mathrm{COP}</script>）提供了基准参考点。</p>
+</blockquote>
 <div class="page-nav-footer">
   <a href="/computational-physics/code/" class="back-portal-btn"><i class="fas fa-chevron-left"></i> 上一章：科学计算核心代码库</a>
   <a href="/2026/06/01/computational_physics/" class="back-portal-btn"><i class="fas fa-microchip"></i> 返回 计算物理 聚合导航</a>
   <a href="/" class="back-portal-btn"><i class="fas fa-home"></i> 返回博客首页</a>
-</div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/sky.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Liang Zhang</div><div class="author-info-description">Balance study、research and life</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/lzhang202410-cpu"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的博客！这里记录物理、计算与技术的碰撞。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81-%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E8%96%84%E8%86%9C%E7%BB%93%E6%9E%84%E7%A8%B3%E6%80%81%E7%94%B5%E5%AF%BC%E7%8E%87%E4%B8%8E%E7%83%AD%E7%94%B5%E5%A4%9A%E7%89%A9%E7%90%86%E5%9C%BA%E8%AE%A1%E7%AE%97"><span class="toc-number">1.</span> <span class="toc-text">一、 案例一：薄膜结构稳态电导率与热电多物理场计算</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%BB%BA%E6%A8%A1%E4%B8%8E%E4%BB%BF%E7%9C%9F%E5%85%A8%E6%B5%81%E7%A8%8B"><span class="toc-number">1.1.</span> <span class="toc-text">1. 建模与仿真全流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E8%AE%A1%E7%AE%97%E7%BB%93%E6%9E%9C%E5%B1%95%E7%A4%BA%E4%B8%8E%E5%9C%BA%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90"><span class="toc-number">1.2.</span> <span class="toc-text">2. 计算结果展示与场分布分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E4%BD%93%E7%94%B5%E5%8A%BF%E4%B8%89%E7%BB%B4%E7%A9%BA%E9%97%B4%E5%88%86%E5%B8%83"><span class="toc-number">1.2.1.</span> <span class="toc-text">(1) 体电势三维空间分布</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E5%A4%9A%E5%88%87%E9%9D%A2%E7%94%B5%E5%9C%BA%E6%A8%A1%E5%88%86%E5%B8%83"><span class="toc-number">1.2.2.</span> <span class="toc-text">(2) 多切面电场模分布</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E6%B2%BF%E5%99%A8%E4%BB%B6%E8%BD%B4%E5%90%91%E5%BC%A7%E9%95%BF%E7%9A%84%E7%94%B5%E5%8A%BF%E9%99%8D%E5%88%86%E5%B8%83"><span class="toc-number">1.2.3.</span> <span class="toc-text">(3) 沿器件轴向弧长的电势降分布</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E8%A1%A8%E9%9D%A2%E6%B8%A9%E5%BA%A6%E6%A2%AF%E5%BA%A6%E4%B8%89%E7%BB%B4%E5%88%86%E5%B8%83"><span class="toc-number">1.2.4.</span> <span class="toc-text">(4) 表面温度梯度三维分布</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-%E7%94%B5%E5%8A%BF%E4%B8%8E%E6%B8%A9%E5%BA%A6%E8%80%A6%E5%90%88%E7%89%B9%E5%BE%81%E6%9B%B2%E7%BA%BF-V-T"><span class="toc-number">1.2.5.</span> <span class="toc-text">(5) 电势与温度耦合特征曲线 (V-T)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81-%E6%A1%88%E4%BE%8B%E4%BA%8C%EF%BC%9AMicro-TEC-%E4%B8%89%E7%BB%B4%E6%A8%A1%E5%9E%8B"><span class="toc-number">2.</span> <span class="toc-text">二、 案例二：Micro-TEC 三维模型</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/07/19/Condensed_matter_physics/" title="凝聚态物理理论基础">凝聚态物理理论基础</a><time datetime="2026-07-19T14:17:00.000Z" title="发表于 2026-07-19 22:17:00">2026-07-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/01/computational_physics/" title="计算物理">计算物理</a><time datetime="2026-06-01T04:00:00.000Z" title="发表于 2026-06-01 12:00:00">2026-06-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/18/research_experience/" title="科研历程">科研历程</a><time datetime="2026-05-18T12:00:00.000Z" title="发表于 2026-05-18 20:00:00">2026-05-18</time></div></div></div></div><div class="card-widget card-categories"><div class="item-headline">
+</div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/sky.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Liang Zhang</div><div class="author-info-description">Balance study、research and life</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/lzhang202410-cpu"><i class="fab fa-github"></i><span>GitHub</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到我的博客！这里记录物理、计算与技术的碰撞。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81-%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E8%96%84%E8%86%9C%E7%BB%93%E6%9E%84%E7%A8%B3%E6%80%81%E7%94%B5%E5%AF%BC%E7%8E%87%E4%B8%8E%E7%83%AD%E7%94%B5%E5%A4%9A%E7%89%A9%E7%90%86%E5%9C%BA%E8%AE%A1%E7%AE%97"><span class="toc-number">1.</span> <span class="toc-text">一、 案例一：薄膜结构稳态电导率与热电多物理场计算</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%BB%BA%E6%A8%A1%E4%B8%8E%E4%BB%BF%E7%9C%9F%E5%85%A8%E6%B5%81%E7%A8%8B"><span class="toc-number">1.1.</span> <span class="toc-text">1. 建模与仿真全流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E8%AE%A1%E7%AE%97%E7%BB%93%E6%9E%9C%E5%B1%95%E7%A4%BA%E4%B8%8E%E5%9C%BA%E5%88%86%E5%B8%83%E5%88%86%E6%9E%90"><span class="toc-number">1.2.</span> <span class="toc-text">2. 计算结果展示与场分布分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E4%BD%93%E7%94%B5%E5%8A%BF%E4%B8%89%E7%BB%B4%E7%A9%BA%E9%97%B4%E5%88%86%E5%B8%83"><span class="toc-number">1.2.1.</span> <span class="toc-text">(1) 体电势三维空间分布</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E5%A4%9A%E5%88%87%E9%9D%A2%E7%94%B5%E5%9C%BA%E6%A8%A1%E5%88%86%E5%B8%83"><span class="toc-number">1.2.2.</span> <span class="toc-text">(2) 多切面电场模分布</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E6%B2%BF%E5%99%A8%E4%BB%B6%E8%BD%B4%E5%90%91%E5%BC%A7%E9%95%BF%E7%9A%84%E7%94%B5%E5%8A%BF%E9%99%8D%E5%88%86%E5%B8%83"><span class="toc-number">1.2.3.</span> <span class="toc-text">(3) 沿器件轴向弧长的电势降分布</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E8%A1%A8%E9%9D%A2%E6%B8%A9%E5%BA%A6%E6%A2%AF%E5%BA%A6%E4%B8%89%E7%BB%B4%E5%88%86%E5%B8%83"><span class="toc-number">1.2.4.</span> <span class="toc-text">(4) 表面温度梯度三维分布</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-%E7%94%B5%E5%8A%BF%E4%B8%8E%E6%B8%A9%E5%BA%A6%E8%80%A6%E5%90%88%E7%89%B9%E5%BE%81%E6%9B%B2%E7%BA%BF-V-T"><span class="toc-number">1.2.5.</span> <span class="toc-text">(5) 电势与温度耦合特征曲线 (V-T)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81-%E6%A1%88%E4%BE%8B%E4%BA%8C%EF%BC%9AMicro-TEC-%E4%B8%89%E7%BB%B4%E6%A8%A1%E5%9E%8B"><span class="toc-number">2.</span> <span class="toc-text">二、 案例二：Micro-TEC 三维模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Antigravity-Python-mph"><span class="toc-number">3.</span> <span class="toc-text">Antigravity+Python + mph</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81-%E5%87%A0%E4%BD%95%E5%B0%BA%E5%AF%B8%E5%8F%82%E6%95%B0%EF%BC%88Geometric-Parameters%EF%BC%89"><span class="toc-number">3.1.</span> <span class="toc-text">一、 几何尺寸参数（Geometric Parameters）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E3%80%81-%E6%9D%90%E6%96%99%E7%89%A9%E7%90%86%E7%89%B9%E6%80%A7%E5%8F%82%E6%95%B0%EF%BC%88Material-Properties%EF%BC%89"><span class="toc-number">3.2.</span> <span class="toc-text">二、 材料物理特性参数（Material Properties）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E3%80%81-%E5%B7%A5%E5%86%B5%E4%B8%8E%E8%BE%B9%E7%95%8C%E6%9D%A1%E4%BB%B6%E5%8F%82%E6%95%B0%EF%BC%88Operational-Conditions%EF%BC%89"><span class="toc-number">3.3.</span> <span class="toc-text">三、 工况与边界条件参数（Operational Conditions）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E3%80%81-%E5%85%B3%E9%94%AE%E6%80%A7%E8%83%BD%E8%BE%93%E5%87%BA%E5%8F%82%E6%95%B0%EF%BC%88Performance-Metrics%EF%BC%89"><span class="toc-number">3.4.</span> <span class="toc-text">四、 关键性能输出参数（Performance Metrics）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%BF%E7%9C%9F%E8%AE%A1%E7%AE%97"><span class="toc-number">3.4.1.</span> <span class="toc-text">仿真计算</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E2%91%A0-%E4%B8%89%E7%BB%B4%E4%BD%93%E7%94%B5%E5%8A%BF%E5%88%86%E5%B8%83"><span class="toc-number">3.4.1.1.</span> <span class="toc-text">① 三维体电势分布</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E2%91%A1-%E4%B8%89%E7%BB%B4%E6%B8%A9%E5%BA%A6%E5%9C%BA%E5%88%86%E5%B8%83"><span class="toc-number">3.4.1.2.</span> <span class="toc-text">② 三维温度场分布</span></a></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/07/19/Condensed_matter_physics/" title="凝聚态物理理论基础">凝聚态物理理论基础</a><time datetime="2026-07-19T14:17:00.000Z" title="发表于 2026-07-19 22:17:00">2026-07-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/01/computational_physics/" title="计算物理">计算物理</a><time datetime="2026-06-01T04:00:00.000Z" title="发表于 2026-06-01 12:00:00">2026-06-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/18/research_experience/" title="科研历程">科研历程</a><time datetime="2026-05-18T12:00:00.000Z" title="发表于 2026-05-18 20:00:00">2026-05-18</time></div></div></div></div><div class="card-widget card-categories"><div class="item-headline">
             <i class="fas fa-folder-open"></i>
             <span>分类</span>
             
           </div>
           <ul class="card-category-list" id="aside-cat-list">
             <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E7%89%A9%E7%90%86%E7%90%86%E8%AE%BA/"><span class="card-category-list-name">物理理论</span><span class="card-category-list-count">1</span></a><ul class="card-category-list child"><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E7%89%A9%E7%90%86%E7%90%86%E8%AE%BA/%E7%AC%94%E8%AE%B0/"><span class="card-category-list-name">笔记</span><span class="card-category-list-count">1</span></a></li></ul></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E7%BB%8F%E5%8E%86/"><span class="card-category-list-name">经历</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E8%AE%A1%E7%AE%97%E7%89%A9%E7%90%86/"><span class="card-category-list-name">计算物理</span><span class="card-category-list-count">1</span></a><ul class="card-category-list child"><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E8%AE%A1%E7%AE%97%E7%89%A9%E7%90%86/%E6%A0%B8%E5%BF%83%E6%8A%80%E8%83%BD/"><span class="card-category-list-name">核心技能</span><span class="card-category-list-count">1</span></a></li></ul></li>
-          </ul></div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站信息</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">3</div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2026-09-30T05:01:29.189Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By Liang Zhang</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+          </ul></div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站信息</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">3</div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2026-10-10T13:46:50.171Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By Liang Zhang</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
   const loadMathjax = () => {
     if (!window.MathJax) {
       window.MathJax = {
