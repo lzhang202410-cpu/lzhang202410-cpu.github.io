@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>半导体激光器 & Nd:YVO4 P-I 温度响应交互式仿真平台</title>
+<style>
+  :root {
+    --bg: #f4f6fa;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --primary: #2563eb;
+    --primary-soft: #eff6ff;
+    --accent: #dc2626;
+    --green: #16a34a;
+    --amber: #d97706;
+    --purple: #7c3aed;
+    --radius: 12px;
+    --shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    color: #fff;
+    padding: 16px 26px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.15);
+  }
+  .brand h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.3px; }
+  .brand p { font-size: 12px; color: #cbd5e1; margin-top: 2px; }
+  .preset-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .preset-btn {
+    background: rgba(255,255,255,0.12);
+    color: #e2e8f0;
+    border: 1px solid rgba(255,255,255,0.22);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .preset-btn:hover { background: rgba(255,255,255,0.24); color: #fff; }
+  .preset-btn.active {
+    background: #38bdf8;
+    color: #0f172a;
+    border-color: #38bdf8;
+    font-weight: 700;
+  }
+
+  /* Layout */
+  .container {
+    max-width: 1480px;
+    margin: 18px auto;
+    padding: 0 18px 24px;
+    display: grid;
+    grid-template-columns: 365px 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 1024px) {
+    .container { grid-template-columns: 1fr; }
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 18px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+
+  /* Controls */
+  .sidebar { display: flex; flex-direction: column; gap: 14px; }
+  .control-group { margin-bottom: 11px; }
+  .control-group:last-child { margin-bottom: 0; }
+  .control-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    margin-bottom: 5px;
+    color: #334155;
+  }
+  .control-label .sub { font-size: 11px; color: var(--muted); }
+  .control-row {
+    display: grid;
+    grid-template-columns: 1fr 74px;
+    gap: 8px;
+    align-items: center;
+  }
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--primary);
+    cursor: pointer;
+    height: 5px;
+  }
+  input[type="number"] {
+    width: 100%;
+    padding: 4px 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 12.5px;
+    text-align: right;
+    color: #0f172a;
+    background: #f8fafc;
+  }
+  input[type="number"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #fff;
+  }
+
+  .toggle-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .seg-btn {
+    flex: 1;
+    padding: 6px 8px;
+    font-size: 12px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    border-radius: 7px;
+    cursor: pointer;
+    color: #475569;
+    font-weight: 600;
+  }
+  .seg-btn.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+  .check-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 12px;
+    color: #334155;
+    margin-top: 8px;
+  }
+  .check-row label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+
+  /* Inverse solver box */
+  .inverse-box {
+    background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+    border: 1px solid #bfdbfe;
+  }
+  .inverse-result {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #dbeafe;
+    font-size: 12.5px;
+  }
+  .inv-val {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--primary);
+    margin: 2px 0;
+  }
+  .inv-warn { color: var(--accent); font-weight: 600; font-size: 12px; }
+
+  /* Main output area */
+  .main { display: flex; flex-direction: column; gap: 16px; }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 768px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 13px 15px;
+    box-shadow: var(--shadow);
+  }
+  .kpi-label { font-size: 11.5px; color: var(--muted); }
+  .kpi-value { font-size: 21px; font-weight: 800; color: #0f172a; margin-top: 3px; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Chart area */
+  .chart-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .tab-bar { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 6px 13px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #f8fafc;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+  }
+  .tab-btn.active {
+    background: #0f172a;
+    color: #fff;
+    border-color: #0f172a;
+  }
+  .action-bar { display: flex; gap: 8px; }
+  .btn {
+    padding: 6px 12px;
+    border-radius: 7px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #1e293b;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: #f1f5f9; border-color: #94a3b8; }
+  .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .btn-primary:hover { background: #1d4ed8; }
+
+  .canvas-wrap {
+    position: relative;
+    width: 100%;
+    height: 430px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #ffffff;
+    overflow: hidden;
+  }
+  canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
+  #tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(15, 23, 42, 0.92);
+    color: #fff;
+    padding: 8px 11px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    line-height: 1.5;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 10;
+    white-space: nowrap;
+  }
+
+  /* Summary Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    text-align: center;
+  }
+  th {
+    background: #f1f5f9;
+    color: #0f172a;
+    font-weight: 700;
+    padding: 8px 6px;
+    border-top: 2px solid #0f172a;
+    border-bottom: 1px solid #94a3b8;
+  }
+  td {
+    padding: 7px 6px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  tr:last-child td { border-bottom: 2px solid #0f172a; }
+  tr.highlight-row td { background: #eff6ff; font-weight: 700; color: #1d4ed8; }
+  .formula-note {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 10px;
+    background: #f8fafc;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border-left: 3px solid var(--primary);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>半导体激光器 &amp; Nd:YVO₄ P-I 温度响应交互式仿真平台</h1>
+    <p>基于电-热自洽速率方程与 Varshni 带隙温漂级联模型 · 支持双向反演与多温度对比</p>
+  </div>
+  <div class="preset-bar">
+    <button class="preset-btn active" data-preset="ndyvo4">Nd:YVO₄ 固体激光器 (808 nm 泵浦)</button>
+    <button class="preset-btn" data-preset="pump808">808 nm 泵浦 LD 单管</button>
+    <button class="preset-btn" data-preset="dfb1550">1550 nm DFB 通信激光器</button>
+    <button class="preset-btn" data-preset="vcsel940">940 nm VCSEL 微腔</button>
+  </div>
+</header>
+
+<div class="container">
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+    <!-- Operating conditions -->
+    <div class="card">
+      <div class="card-title">
+        <span>1. 工作条件与驱动参数</span>
+        <button class="btn" id="btnReset" style="padding:3px 8px;font-size:11px;">恢复默认</button>
+      </div>
+      <div class="toggle-row">
+        <button class="seg-btn active" id="modeCW">CW 连续波 (含自加热)</button>
+        <button class="seg-btn" id="modePulsed">Pulsed 脉冲 (无自加热)</button>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label"><span>热沉温度 T<sub>h</sub> (°C)</span><span class="sub" id="lblThK">298.15 K</span></div>
+        <div class="control-row">
+          <input type="range" id="sl_Th" min="-10" max="80" step="1" value="25">
+          <input type="number" id="in_Th" min="-10" max="80" step="1" value="25">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label"><span>最大扫描电流 I<sub>max</sub> (<span class="unitI">A</span>)</span></div>
+        <div class="control-row">
+          <input type="range" id="sl_Imax" min="2.0" max="6.0" step="0.1" value="4.5">
+          <input type="number" id="in_Imax" min="2.0" max="6.0" step="0.1" value="4.5">
+        </div>
+      </div>
+
+      <div class="check-row">
+        <label><input type="checkbox" id="chkMultiT" checked> 叠加多温度对比 (10/20/30/40/60 °C)</label>
+        <label><input type="checkbox" id="chkExp" checked> 显示 25 °C 实测散点</label>
+      </div>
+    </div>
+
+    <!-- Physical & Thermal Parameters -->
+    <div class="card">
+      <div class="card-title">
+        <span>2. 温度效应与带隙调节参数</span>
+        <span class="badge" id="lblEg">Eg = 1.534 eV</span>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label"><span>阈值特征温度 T<sub>0</sub> (K)</span><span class="sub">越大越耐高温</span></div>
+        <div class="control-row">
+          <input type="range" id="sl_T0" min="30" max="300" step="2" value="110">
+          <input type="number" id="in_T0" min="30" max="300" step="2" value="110">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label"><span>斜率特征温度 T<sub>1</sub> (K)</span><span class="sub">外量子效率衰减</span></div>
+        <div class="control-row">
+          <input type="range" id="sl_T1" min="60" max="500" step="5" value="220">
+          <input type="number" id="in_T1" min="60" max="500" step="5" value="220">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label"><span>器件热阻 R<sub>th</sub> (K/W)</span><span class="sub">控制 CW 热翻转</span></div>
+        <div class="control-row">
+          <input type="range" id="sl_Rth" min="0.0" max="25.0" step="0.2" value="1.2">
+          <input type="number" id="in_Rth" min="0.0" max="25.0" step="0.2" value="1.2">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label"><span>标称波长 λ<sub>0</sub> (nm)</span><span class="sub">材料带隙调控</span></div>
+        <div class="control-row">
+          <input type="range" id="sl_lam0" min="780" max="1600" step="0.5" value="808.5">
+          <input type="number" id="in_lam0" min="780" max="1600" step="0.5" value="808.5">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label"><span>波长温漂 κ<sub>λ</sub> (nm/°C)</span><span class="sub">FP~0.3 / VCSEL~0.07</span></div>
+        <div class="control-row">
+          <input type="range" id="sl_klam" min="0.02" max="0.50" step="0.01" value="0.28">
+          <input type="number" id="in_klam" min="0.02" max="0.50" step="0.01" value="0.28">
+        </div>
+      </div>
+
+      <div class="control-group" id="grp_dlam">
+        <div class="control-label"><span>Nd:YVO₄ 吸收带宽 Δλ<sub>abs</sub> (nm)</span></div>
+        <div class="control-row">
+          <input type="range" id="sl_dlam" min="2.0" max="15.0" step="0.5" value="8.0">
+          <input type="number" id="in_dlam" min="2.0" max="15.0" step="0.5" value="8.0">
+        </div>
+      </div>
+    </div>
+
+    <!-- Inverse Solver -->
+    <div class="card inverse-box">
+      <div class="card-title" style="border-bottom-color:#bfdbfe;">
+        <span>3. 反向求解：由输出光功率反算驱动电流</span>
+        <span class="badge">双向求解</span>
+      </div>
+      <div class="control-group">
+        <div class="control-label"><span>目标输出功率 P<sub>out</sub><sup>*</sup> (mW)</span></div>
+        <div class="control-row">
+          <input type="range" id="sl_Ptarget" min="0.5" max="30" step="0.2" value="10.0">
+          <input type="number" id="in_Ptarget" min="0.1" max="2000" step="0.2" value="10.0">
+        </div>
+      </div>
+      <div class="inverse-result" id="invOutput">
+        <div>所需驱动电流 I<sup>*</sup>：</div>
+        <div class="inv-val" id="invIval">--</div>
+        <div id="invDetail" style="color:#475569;font-size:11.5px;"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT MAIN OUTPUT -->
+  <main class="main">
+    <!-- KPI Row -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">等效阈值电流 I<sub>th</sub></div>
+        <div class="kpi-value" id="kpiIth">--</div>
+        <div class="kpi-sub" id="kpiIthSub">--</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">平均斜率效率 η<sub>s</sub></div>
+        <div class="kpi-value" id="kpiSlope">--</div>
+        <div class="kpi-sub" id="kpiSlopeSub">--</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">扫描区最大输出 P<sub>max</sub></div>
+        <div class="kpi-value" id="kpiPmax">--</div>
+        <div class="kpi-sub" id="kpiPmaxSub">--</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">最高电流处结温 / 波长</div>
+        <div class="kpi-value" id="kpiTj">--</div>
+        <div class="kpi-sub" id="kpiLamSub">--</div>
+      </div>
+    </div>
+
+    <!-- Interactive Chart Card -->
+    <div class="card">
+      <div class="chart-header">
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="pi">P<sub>out</sub> - I 特性曲线</button>
+          <button class="tab-btn" data-tab="pp">P<sub>out</sub> - P<sub>pump</sub> / 结温演化</button>
+          <button class="tab-btn" data-tab="temp">温度敏感度扫描 (10–60 °C)</button>
+        </div>
+        <div class="action-bar">
+          <button class="btn" id="btnExportCSV">导出仿真 CSV</button>
+          <button class="btn btn-primary" id="btnExportPNG">保存高清 PNG</button>
+        </div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="plotCanvas"></canvas>
+        <div id="tooltip"></div>
+      </div>
+      <div class="formula-note" id="modelNote">
+        当前模式：<b>808 nm LD 泵浦 Nd:YVO₄ 固体激光器</b>（锚定室温 25 °C 实测数据 <code>NdYVO4_experients.dat</code>，阈值以上 RMSE ≈ 0.43 mW）。拖动左侧滑块可实时观察温度、特征温度、热阻与带隙温漂对 P-I 曲线的影响。
+      </div>
+    </div>
+
+    <!-- Multi-Temperature Summary Table -->
+    <div class="card">
+      <div class="card-title">
+        <span>多温度定量预测对比表（自动随左侧物理参数实时更新）</span>
+        <span class="badge" id="tblRefNote">参考工作电流 I = 3.0 A</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>热沉温度 T<sub>h</sub> (°C)</th>
+              <th>结温 T<sub>j</sub> (°C)</th>
+              <th>发射波长 λ (nm)</th>
+              <th id="thExtra">吸收效率 η<sub>a</sub></th>
+              <th>阈值电流 I<sub>th</sub> (<span class="unitI">A</span>)</th>
+              <th>斜率效率</th>
+              <th>参考电流输出 P<sub>out</sub> (mW)</th>
+              <th>目标功率反演 I<sup>*</sup></th>
+            </tr>
+          </thead>
+          <tbody id="summaryBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ================= 1. 嵌入室温 25 °C 实测数据 (NdYVO4_experients.dat) =================
+const EXP_DATA = [
+  [3.00,1268.6,13.2],[2.95,1246.6,12.4],[2.90,1229.4,12.0],[2.85,1211.8,11.6],
+  [2.80,1196.3,11.2],[2.75,1174.2,10.8],[2.70,1153.0,10.4],[2.65,1136.2,10.0],
+  [2.60,1114.6,9.6],[2.55,1091.9,8.8],[2.50,1073.0,8.4],[2.45,1046.2,7.6],
+  [2.40,1025.0,6.8],[2.35,1003.9,6.4],[2.30,986.2,6.0],[2.25,965.2,5.6],
+  [2.20,940.2,5.6],[2.15,919.4,5.2],[2.10,908.4,4.4],[2.05,886.2,3.6],
+  [2.00,853.8,3.2],[1.95,824.2,1.5],[1.90,803.4,2.0],[1.85,780.2,1.2],
+  [1.80,754.6,0.9],[1.75,728.2,0.4],[1.70,700.1,0.0],[1.65,677.3,0.0],
+  [1.60,649.0,0.0],[1.55,620.0,0.0],[1.50,596.6,0.0],[1.45,570.0,0.0],
+  [1.40,540.2,0.0],[1.35,513.4,0.0],[1.30,479.0,0.0],[1.25,455.4,0.0]
+];
+
+// ================= 2. 器件预设参数 =================
+const PRESETS = {
+  ndyvo4: {
+    name: "Nd:YVO₄ 固体激光器 (808 nm LD 泵浦)",
+    isDPSSL: true, unitI: "A", iScale: 1, // A
+    Th: 25, Imax: 4.5, Imin: 0.0, Iref: 3.0,
+    T0: 110, T1: 220, Rth: 1.2, lam0: 808.5, klam: 0.28, dlam: 8.0,
+    I_th0: 0.241, eta_p0: 0.4878, V0: 1.65, Rs: 0.25,
+    Ptarget: 10.0, PtargetMax: 35, ImaxMin: 2.0, ImaxMax: 6.0, ImaxStep: 0.1,
+    note: "当前模式：<b>808 nm LD 泵浦 Nd:YVO₄ 固体激光器</b>（锚定室温 25 °C 实测数据 <code>NdYVO4_experients.dat</code>，阈值以上 RMSE ≈ 0.43 mW）。"
+  },
+  pump808: {
+    name: "808 nm 泵浦 LD 单管",
+    isDPSSL: false, unitI: "A", iScale: 1,
+    Th: 25, Imax: 4.0, Imin: 0.0, Iref: 3.0,
+    T0: 110, T1: 220, Rth: 4.5, lam0: 808.5, klam: 0.28, dlam: 8.0,
+    I_th0: 0.241, eta_p0: 0.4878, V0: 1.65, Rs: 0.25,
+    Ptarget: 1000, PtargetMax: 1800, ImaxMin: 1.5, ImaxMax: 6.0, ImaxStep: 0.1,
+    note: "当前模式：<b>808 nm 边发射泵浦 LD 单管</b>（直接输出泵浦光功率 P<sub>p</sub>，调大热阻 R<sub>th</sub> 可直观观察连续波热翻转 Thermal Rollover）。"
+  },
+  dfb1550: {
+    name: "1550 nm DFB 通信激光器",
+    isDPSSL: false, unitI: "mA", iScale: 1e-3, // UI in mA, physics in A
+    Th: 25, Imax: 80, Imin: 0, Iref: 50,
+    T0: 70, T1: 160, Rth: 85.0, lam0: 1550.0, klam: 0.10, dlam: 8.0,
+    I_th0: 0.008, eta_p0: 0.36, V0: 1.15, Rs: 6.0,
+    Ptarget: 10.0, PtargetMax: 25, ImaxMin: 20, ImaxMax: 150, ImaxStep: 5,
+    note: "当前模式：<b>1550 nm InGaAsP/InP DFB 通信激光器</b>（典型低阈值 mA 级器件，T<sub>0</sub> ≈ 70 K，可直观演示高温阈值漂移与 CW 功率饱和）。"
+  },
+  vcsel940: {
+    name: "940 nm VCSEL 微腔激光器",
+    isDPSSL: false, unitI: "mA", iScale: 1e-3,
+    Th: 25, Imax: 20, Imin: 0, Iref: 12,
+    T0: 95, T1: 180, Rth: 350.0, lam0: 940.0, klam: 0.07, dlam: 8.0,
+    I_th0: 0.0015, eta_p0: 0.55, V0: 1.85, Rs: 45.0,
+    Ptarget: 3.0, PtargetMax: 8, ImaxMin: 8, ImaxMax: 35, ImaxStep: 1,
+    note: "当前模式：<b>940 nm 氧化限制型 VCSEL 微腔激光器</b>（高热阻与串联电阻导致显著热翻转，波长温漂 κ<sub>λ</sub> ≈ 0.07 nm/°C 远低于边发射 LD）。"
+  }
+};
+
+let state = {
+  presetKey: "ndyvo4",
+  mode: "CW", // CW or Pulsed
+  tab: "pi",  // pi | pp | temp
+  Th: 25, Imax: 4.5, T0: 110, T1: 220, Rth: 1.2, lam0: 808.5, klam: 0.28, dlam: 8.0,
+  Ptarget: 10.0, showMultiT: true, showExp: true
+};
+
+// ================= 3. 物理核心求解器 (与 pi_temp_prediction.py 一致) =================
+function solvePoint(I_ui, Th_C, st) {
+  const pr = PRESETS[st.presetKey];
+  const I_A = I_ui * pr.iScale;
+  const T_ref_K = 298.15;
+  const T_h_K = Th_C + 273.15;
+  const D_eff = (st.mode === "CW") ? 1.0 : 0.0;
+  const gamma_V = 1.5e-3;
+
+  // 外层结温不动点迭代
+  let Tj_K = T_h_K;
+  let Pp_W = 0, lam_p = st.lam0, P_diss = 0;
+  // 带隙变化对标称斜率效率的光子能量缩放
+  const egScale = pr.lam0 / st.lam0;
+
+  for (let k = 0; k < 45; k++) {
+    const dT = Tj_K - T_ref_K;
+    lam_p = st.lam0 + st.klam * dT;
+    const I_th_LD = pr.I_th0 * Math.exp(dT / st.T0);
+    const eta_p_T = pr.eta_p0 * egScale * (st.lam0 / lam_p) * Math.exp(-dT / st.T1);
+    Pp_W = Math.max(0, eta_p_T * (I_A - I_th_LD));
+    const V_op = Math.max(0.5, pr.V0 - gamma_V * dT + I_A * pr.Rs);
+    P_diss = Math.max(0, I_A * V_op - Pp_W);
+    const Tj_new = T_h_K + D_eff * st.Rth * P_diss;
+    if (Math.abs(Tj_new - Tj_K) < 1e-5) { Tj_K = Tj_new; break; }
+    Tj_K = 0.5 * Tj_K + 0.5 * Tj_new;
+  }
+
+  const Pp_mW = Pp_W * 1000;
+  const Tj_C = Tj_K - 273.15;
+
+  if (!pr.isDPSSL) {
+    return { I_ui, Pp_mW, Pout_mW: Pp_mW, Tj_C, lam_p, eta_a: 1.0, P_diss };
+  }
+
+  // Nd:YVO4 后端级联模型
+  const lam_abs_aligned = 809.81; // 25 °C 室温锚定吸收峰对齐波长
+  const eta_a_peak = 0.85;
+  const alpha_tot = -Math.log(1 - eta_a_peak);
+  const alpha_bg = 0.55;
+  const alpha_res = alpha_tot - alpha_bg;
+  const alpha_lc = alpha_bg + alpha_res / (1 + Math.pow((lam_p - lam_abs_aligned) / (st.dlam / 2), 2));
+  const eta_a = 1 - Math.exp(-alpha_lc);
+
+  const lam_l = 1064.0;
+  const eta_c = 0.05 / (0.05 + 0.01);
+  const s_ref = 0.02431;
+  const Pp_th_ref = 731.1;
+  const eta_m_ref = s_ref / ((lam_abs_aligned / lam_l) * eta_a_peak * eta_c);
+
+  const dTh = Th_C - 25.0;
+  const sigma_ratio = Math.max(0.5, 1 - 1.5e-3 * dTh);
+  const eta_m_T = eta_m_ref / (1 + 2.0e-3 * Math.max(0, dTh));
+
+  const Pp_th_eff = Pp_th_ref * (eta_a_peak / eta_a) * (eta_m_ref / eta_m_T) * (1 / sigma_ratio);
+  const s_eff = (lam_p / lam_l) * eta_a * eta_c * eta_m_T;
+  const Pout_mW = Math.max(0, s_eff * (Pp_mW - Pp_th_eff));
+
+  return { I_ui, Pp_mW, Pout_mW, Tj_C, lam_p, eta_a, P_diss };
+}
+
+function simulateCurve(Th_C, st, nPts = 220) {
+  const pts = [];
+  for (let i = 0; i <= nPts; i++) {
+    const I_ui = (st.Imax * i) / nPts;
+    pts.push(solvePoint(I_ui, Th_C, st));
+  }
+  return pts;
+}
+
+function analyzeCurve(pts) {
+  let maxP = 0, maxIdx = 0, thIdx = -1;
+  const pThresh = Math.max(0.05, Math.max(...pts.map(p => p.Pout_mW)) * 0.005);
+  for (let i = 0; i < pts.length; i++) {
+    if (thIdx === -1 && pts[i].Pout_mW > pThresh) thIdx = i;
+    if (pts[i].Pout_mW > maxP) { maxP = pts[i].Pout_mW; maxIdx = i; }
+  }
+  const Ith = thIdx >= 0 ? pts[thIdx].I_ui : null;
+  let slope = 0;
+  if (thIdx >= 0 && maxIdx > thIdx + 2) {
+    const midIdx = Math.min(maxIdx, thIdx + Math.max(3, Math.floor((maxIdx - thIdx) * 0.55)));
+    slope = (pts[midIdx].Pout_mW - pts[thIdx].Pout_mW) / (pts[midIdx].I_ui - pts[thIdx].I_ui);
+  }
+  return { Ith, maxP, maxI: pts[maxIdx].I_ui, slope, thIdx, maxIdx };
+}
+
+function inverseSolve(Ptarget, Th_C, st) {
+  const pts = simulateCurve(Th_C, st, 250);
+  const info = analyzeCurve(pts);
+  if (Ptarget <= 0) return { ok: false, msg: "目标功率需大于 0" };
+  if (info.maxP < Ptarget) {
+    return {
+      ok: false, maxP: info.maxP,
+      msg: `当前扫描上限内最大输出仅 ${info.maxP.toFixed(2)} mW，无法达到 ${Ptarget.toFixed(1)} mW（可降低热沉温度或增大 Imax）。`
+    };
+  }
+  // 在上升支 [0, maxIdx] 二分求解
+  let lo = 0, hi = info.maxI;
+  for (let k = 0; k < 35; k++) {
+    const mid = 0.5 * (lo + hi);
+    const val = solvePoint(mid, Th_C, st).Pout_mW;
+    if (val < Ptarget) lo = mid; else hi = mid;
+  }
+  const res = solvePoint(0.5 * (lo + hi), Th_C, st);
+  return { ok: true, point: res };
+}
+
+// ================= 4. Canvas 高清绘图引擎 =================
+const canvas = document.getElementById("plotCanvas");
+const ctx = canvas.getContext("2d");
+const tooltip = document.getElementById("tooltip");
+let lastPlotMeta = null;
+
+function drawPlot() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(rect.width * dpr);
+  canvas.height = Math.round(rect.height * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, W, H);
+
+  const pr = PRESETS[state.presetKey];
+  const pad = { l: 64, r: state.tab === "temp" ? 68 : 26, t: 36, b: 48 };
+  const pw = W - pad.l - pad.r;
+  const ph = H - pad.t - pad.b;
+
+  const mainPts = simulateCurve(state.Th, state);
+  const inv = inverseSolve(state.Ptarget, state.Th, state);
+  const multiTemps = [10, 20, 30, 40, 60];
+  const multiColors = { 10: "#2563eb", 20: "#16a34a", 30: "#ea580c", 40: "#dc2626", 60: "#7c3aed" };
+
+  // Helper: draw axes & grid
+  function drawAxes(xMin, xMax, yMin, yMax, xLabel, yLabel, title, y2Range = null, y2Label = "") {
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.lineWidth = 1;
+    ctx.font = "11px 'Microsoft YaHei', sans-serif";
+    ctx.fillStyle = "#475569";
+
+    const nx = 6, ny = 5;
+    for (let i = 0; i <= nx; i++) {
+      const xv = xMin + (xMax - xMin) * i / nx;
+      const x = pad.l + pw * i / nx;
+      ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t + ph); ctx.stroke();
+      ctx.textAlign = "center";
+      ctx.fillText(xv.toFixed(xMax - xMin > 20 ? 0 : 2), x, pad.t + ph + 18);
+    }
+    for (let j = 0; j <= ny; j++) {
+      const yv = yMin + (yMax - yMin) * j / ny;
+      const y = pad.t + ph - ph * j / ny;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + pw, y); ctx.stroke();
+      ctx.textAlign = "right";
+      ctx.fillText(yv.toFixed(yMax > 100 ? 0 : 1), pad.l - 8, y + 4);
+    }
+    if (y2Range) {
+      ctx.fillStyle = "#2563eb";
+      for (let j = 0; j <= ny; j++) {
+        const yv = y2Range[0] + (y2Range[1] - y2Range[0]) * j / ny;
+        const y = pad.t + ph - ph * j / ny;
+        ctx.textAlign = "left";
+        ctx.fillText(yv.toFixed(y2Range[1] > 20 ? 1 : 2), pad.l + pw + 8, y + 4);
+      }
+      ctx.save();
+      ctx.translate(W - 14, pad.t + ph / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = "center";
+      ctx.font = "bold 12px 'Microsoft YaHei', sans-serif";
+      ctx.fillText(y2Label, 0, 0);
+      ctx.restore();
+    }
+
+    // Border box
+    ctx.strokeStyle = "#334155";
+    ctx.lineWidth = 1.3;
+    ctx.strokeRect(pad.l, pad.t, pw, ph);
+
+    // Titles
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 13.5px 'Microsoft YaHei', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(title, pad.l + pw / 2, 22);
+
+    ctx.font = "bold 12px 'Microsoft YaHei', sans-serif";
+    ctx.fillText(xLabel, pad.l + pw / 2, H - 10);
+
+    ctx.save();
+    ctx.translate(18, pad.t + ph / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = y2Range ? "#dc2626" : "#0f172a";
+    ctx.fillText(yLabel, 0, 0);
+    ctx.restore();
+  }
+
+  function mapX(v, xMin, xMax) { return pad.l + ((v - xMin) / (xMax - xMin)) * pw; }
+  function mapY(v, yMin, yMax) { return pad.t + ph - ((v - yMin) / (yMax - yMin)) * ph; }
+
+  function drawLine(xs, ys, xMin, xMax, yMin, yMax, color, lw = 2.2, dash = []) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lw;
+    ctx.setLineDash(dash);
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < xs.length; i++) {
+      if (ys[i] === null || isNaN(ys[i])) { started = false; continue; }
+      const x = mapX(xs[i], xMin, xMax);
+      const y = mapY(ys[i], yMin, yMax);
+      if (!started) { ctx.moveTo(x, y); started = true; } else { ctx.lineTo(x, y); }
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawLegend(items) {
+    const lx = pad.l + 12, ly = pad.t + 10;
+    const lineH = 17;
+    const boxW = 190, boxH = items.length * lineH + 10;
+    ctx.save();
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.strokeStyle = "#cbd5e1";
+    ctx.lineWidth = 1;
+    ctx.fillRect(lx, ly, boxW, boxH);
+    ctx.strokeRect(lx, ly, boxW, boxH);
+    ctx.font = "11px 'Microsoft YaHei', sans-serif";
+    items.forEach((it, idx) => {
+      const y = ly + 13 + idx * lineH;
+      if (it.dot) {
+        ctx.fillStyle = it.color;
+        ctx.beginPath(); ctx.arc(lx + 14, y - 3, 3.5, 0, Math.PI * 2); ctx.fill();
+      } else {
+        ctx.strokeStyle = it.color;
+        ctx.lineWidth = it.lw || 2;
+        ctx.setLineDash(it.dash || []);
+        ctx.beginPath(); ctx.moveTo(lx + 6, y - 3); ctx.lineTo(lx + 24, y - 3); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      ctx.fillStyle = "#1e293b";
+      ctx.textAlign = "left";
+      ctx.fillText(it.label, lx + 30, y);
+    });
+    ctx.restore();
+  }
+
+  if (state.tab === "pi") {
+    const xMin = 0, xMax = state.Imax;
+    let maxY = Math.max(...mainPts.map(p => p.Pout_mW), state.Ptarget * 1.1, 5);
+    const multiData = {};
+    if (state.showMultiT) {
+      for (const t of multiTemps) {
+        multiData[t] = simulateCurve(t, state, 140);
+        maxY = Math.max(maxY, ...multiData[t].map(p => p.Pout_mW));
+      }
+    }
+    if (pr.isDPSSL && state.showExp) maxY = Math.max(maxY, 15);
+    const yMin = 0, yMax = maxY * 1.12;
+
+    drawAxes(xMin, xMax, yMin, yMax, `驱动电流 I (${pr.unitI})`, "激光输出功率 P_out (mW)",
+      `${pr.name} — P_out - I 特性曲线 (${state.mode})`);
+
+    const legend = [];
+    if (state.showMultiT) {
+      for (const t of multiTemps) {
+        drawLine(multiData[t].map(p => p.I_ui), multiData[t].map(p => p.Pout_mW),
+          xMin, xMax, yMin, yMax, multiColors[t], 1.6, [5, 3]);
+        legend.push({ color: multiColors[t], lw: 1.6, dash: [5, 3], label: `对比 Th = ${t} °C` });
+      }
+    }
+    // Main active curve
+    drawLine(mainPts.map(p => p.I_ui), mainPts.map(p => p.Pout_mW), xMin, xMax, yMin, yMax, "#0f172a", 3.0);
+    legend.unshift({ color: "#0f172a", lw: 3.0, label: `当前 Th = ${state.Th} °C` });
+
+    // Experimental points for Nd:YVO4
+    if (pr.isDPSSL && state.showExp) {
+      ctx.fillStyle = "#334155";
+      for (const [ie, pe, ple] of EXP_DATA) {
+        if (ie <= xMax) {
+          ctx.beginPath();
+          ctx.arc(mapX(ie, xMin, xMax), mapY(ple, yMin, yMax), 3.3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      legend.push({ dot: true, color: "#334155", label: "25 °C 室温实测数据" });
+    }
+
+    // Inverse target crosshair
+    if (inv.ok) {
+      const cx = mapX(inv.point.I_ui, xMin, xMax);
+      const cy = mapY(inv.point.Pout_mW, yMin, yMax);
+      ctx.save();
+      ctx.strokeStyle = "#dc2626";
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(pad.l, cy); ctx.lineTo(cx, cy); ctx.lineTo(cx, pad.t + ph); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#dc2626";
+      ctx.beginPath(); ctx.arc(cx, cy, 5.5, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.8; ctx.stroke();
+      ctx.fillStyle = "#b91c1c";
+      ctx.font = "bold 11.5px 'Microsoft YaHei', sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText(`反演点: I*=${inv.point.I_ui.toFixed(2)} ${pr.unitI}`, Math.min(cx + 8, W - 140), Math.max(cy - 8, pad.t + 16));
+      ctx.restore();
+    }
+
+    drawLegend(legend);
+    lastPlotMeta = { type: "pi", xMin, xMax, yMin, yMax, pad, pw, ph, pts: mainPts };
+
+  } else if (state.tab === "pp") {
+    if (pr.isDPSSL) {
+      const xMin = 400;
+      let xMax = Math.max(...mainPts.map(p => p.Pp_mW), 1400);
+      let maxY = Math.max(...mainPts.map(p => p.Pout_mW), 15);
+      const multiData = {};
+      if (state.showMultiT) {
+        for (const t of multiTemps) {
+          multiData[t] = simulateCurve(t, state, 140);
+          xMax = Math.max(xMax, ...multiData[t].map(p => p.Pp_mW));
+          maxY = Math.max(maxY, ...multiData[t].map(p => p.Pout_mW));
+        }
+      }
+      xMax *= 1.05;
+      const yMin = 0, yMax = maxY * 1.12;
+      drawAxes(xMin, xMax, yMin, yMax, "LD 泵浦光功率 P_pump (mW)", "激光输出功率 P_out (mW)",
+        "Nd:YVO₄ — P_out - P_pump 光-光转换特性");
+
+      const legend = [];
+      if (state.showMultiT) {
+        for (const t of multiTemps) {
+          drawLine(multiData[t].map(p => p.Pp_mW), multiData[t].map(p => p.Pout_mW),
+            xMin, xMax, yMin, yMax, multiColors[t], 1.6, [5, 3]);
+          legend.push({ color: multiColors[t], lw: 1.6, dash: [5, 3], label: `对比 Th = ${t} °C` });
+        }
+      }
+      drawLine(mainPts.map(p => p.Pp_mW), mainPts.map(p => p.Pout_mW), xMin, xMax, yMin, yMax, "#0f172a", 3.0);
+      legend.unshift({ color: "#0f172a", lw: 3.0, label: `当前 Th = ${state.Th} °C` });
+
+      if (state.showExp) {
+        ctx.fillStyle = "#334155";
+        for (const [ie, pe, ple] of EXP_DATA) {
+          ctx.beginPath();
+          ctx.arc(mapX(pe, xMin, xMax), mapY(ple, yMin, yMax), 3.3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        legend.push({ dot: true, color: "#334155", label: "25 °C 室温实测数据" });
+      }
+      drawLegend(legend);
+      lastPlotMeta = { type: "pp", xMin, xMax, yMin, yMax, pad, pw, ph, pts: mainPts };
+    } else {
+      // 非 DPSSL 模式：绘制结温 Tj 与波长 lambda 随电流演化
+      const xMin = 0, xMax = state.Imax;
+      const tjMin = Math.min(...mainPts.map(p => p.Tj_C)) - 2;
+      const tjMax = Math.max(...mainPts.map(p => p.Tj_C)) + 5;
+      drawAxes(xMin, xMax, tjMin, tjMax, `驱动电流 I (${pr.unitI})`, "有源区结温 T_j (°C)",
+        `${pr.name} — 电流自加热结温演化 (Th = ${state.Th} °C)`);
+      drawLine(mainPts.map(p => p.I_ui), mainPts.map(p => p.Tj_C), xMin, xMax, tjMin, tjMax, "#dc2626", 2.8);
+      drawLegend([{ color: "#dc2626", lw: 2.8, label: "有源区结温 Tj (°C)" }]);
+      lastPlotMeta = { type: "tj", xMin, xMax, yMin: tjMin, yMax: tjMax, pad, pw, ph, pts: mainPts };
+    }
+  } else {
+    // Tab 3: Temperature Sensitivity Scan (10 - 60 °C)
+    const Ts = [], Pouts = [], Iths = [];
+    for (let t = 10; t <= 60; t += 2) {
+      Ts.push(t);
+      const c = simulateCurve(t, state, 140);
+      const info = analyzeCurve(c);
+      const pRef = solvePoint(Math.min(pr.Iref, state.Imax), t, state).Pout_mW;
+      Pouts.push(pRef);
+      Iths.push(info.Ith);
+    }
+    const pMax = Math.max(...Pouts, 5) * 1.25;
+    const validIths = Iths.filter(v => v !== null);
+    const iMin = validIths.length ? Math.max(0, Math.min(...validIths) * 0.85) : 0;
+    const iMax = validIths.length ? Math.max(...validIths) * 1.15 : state.Imax;
+
+    drawAxes(10, 60, 0, pMax, "热沉温度 T_h (°C)", `参考电流输出 P_out (mW)`,
+      `温度灵敏度扫描 (参考电流 I = ${Math.min(pr.Iref, state.Imax)} ${pr.unitI})`,
+      [iMin, iMax], `等效阈值电流 I_th (${pr.unitI})`);
+
+    drawLine(Ts, Pouts, 10, 60, 0, pMax, "#dc2626", 2.6);
+    drawLine(Ts, Iths, 10, 60, iMin, iMax, "#2563eb", 2.3, [6, 4]);
+    drawLegend([
+      { color: "#dc2626", lw: 2.6, label: `输出功率 P_out (左轴)` },
+      { color: "#2563eb", lw: 2.3, dash: [6, 4], label: `阈值电流 I_th (右轴)` }
+    ]);
+    lastPlotMeta = { type: "temp", xMin: 10, xMax: 60, yMin: 0, yMax: pMax, pad, pw, ph, Ts, Pouts, Iths };
+  }
+}
+
+// ================= 5. 更新所有 UI 指标与表格 =================
+function updateAll() {
+  const pr = PRESETS[state.presetKey];
+  document.getElementById("lblThK").textContent = `${(state.Th + 273.15).toFixed(2)} K`;
+  document.getElementById("lblEg").textContent = `Eg = ${(1239.84 / state.lam0).toFixed(3)} eV`;
+  document.getElementById("grp_dlam").style.display = pr.isDPSSL ? "block" : "none";
+  document.getElementById("thExtra").textContent = pr.isDPSSL ? "吸收效率 ηa" : "热耗散 Pdiss (W)";
+  document.querySelectorAll(".unitI").forEach(el => el.textContent = pr.unitI);
+  const iRefUse = Math.min(pr.Iref, state.Imax);
+  document.getElementById("tblRefNote").textContent = `参考工作电流 I = ${iRefUse} ${pr.unitI}`;
+  document.getElementById("modelNote").innerHTML = pr.note;
+
+  // Main curve KPIs
+  const pts = simulateCurve(state.Th, state);
+  const info = analyzeCurve(pts);
+  const endPt = pts[pts.length - 1];
+
+  document.getElementById("kpiIth").textContent = info.Ith !== null ? `${info.Ith.toFixed(3)} ${pr.unitI}` : `>${state.Imax} ${pr.unitI}`;
+  document.getElementById("kpiIthSub").textContent = info.Ith !== null ? `模式: ${state.mode} | Th = ${state.Th} °C` : "当前温区未起振";
+
+  document.getElementById("kpiSlope").textContent = info.slope > 0 ? `${info.slope.toFixed(2)} mW/${pr.unitI}` : "0.00";
+  document.getElementById("kpiSlopeSub").textContent = pr.isDPSSL ? `室温基准 ≈ 11.0 mW/A` : `外量子效率随 T1 衰减`;
+
+  document.getElementById("kpiPmax").textContent = `${info.maxP.toFixed(2)} mW`;
+  document.getElementById("kpiPmaxSub").textContent = `峰值位于 I = ${info.maxI.toFixed(2)} ${pr.unitI}`;
+
+  document.getElementById("kpiTj").textContent = `${endPt.Tj_C.toFixed(1)} °C`;
+  document.getElementById("kpiLamSub").textContent = `波长 λ = ${endPt.lam_p.toFixed(2)} nm (ΔT = +${(endPt.Tj_C - state.Th).toFixed(1)} K)`;
+
+  // Inverse solver
+  const inv = inverseSolve(state.Ptarget, state.Th, state);
+  if (inv.ok) {
+    document.getElementById("invIval").textContent = `${inv.point.I_ui.toFixed(3)} ${pr.unitI}`;
+    document.getElementById("invDetail").innerHTML =
+      `结温 T<sub>j</sub> = <b>${inv.point.Tj_C.toFixed(1)} °C</b> · 波长 λ = <b>${inv.point.lam_p.toFixed(2)} nm</b>` +
+      (pr.isDPSSL ? ` · 吸收率 η<sub>a</sub> = <b>${(inv.point.eta_a * 100).toFixed(1)}%</b>` : "");
+  } else {
+    document.getElementById("invIval").textContent = "无法达到";
+    document.getElementById("invDetail").innerHTML = `<span class="inv-warn">${inv.msg}</span>`;
+  }
+
+  // Multi-temperature summary table
+  const tbody = document.getElementById("summaryBody");
+  tbody.innerHTML = "";
+  const tableTemps = [10, 20, 25, 30, 40, 60];
+  if (!tableTemps.includes(state.Th)) tableTemps.push(state.Th);
+  tableTemps.sort((a, b) => a - b);
+
+  for (const t of tableTemps) {
+    const c = simulateCurve(t, state, 140);
+    const ci = analyzeCurve(c);
+    const refPt = solvePoint(iRefUse, t, state);
+    const invT = inverseSolve(state.Ptarget, t, state);
+    const tr = document.createElement("tr");
+    if (t === state.Th) tr.className = "highlight-row";
+    tr.innerHTML = `
+      <td>${t}${t === state.Th ? " (当前)" : ""}</td>
+      <td>${refPt.Tj_C.toFixed(1)}</td>
+      <td>${refPt.lam_p.toFixed(2)}</td>
+      <td>${pr.isDPSSL ? refPt.eta_a.toFixed(3) : refPt.P_diss.toFixed(3)}</td>
+      <td>${ci.Ith !== null ? ci.Ith.toFixed(3) : ">" + state.Imax}</td>
+      <td>${ci.slope.toFixed(2)} mW/${pr.unitI}</td>
+      <td>${refPt.Pout_mW.toFixed(2)}</td>
+      <td>${invT.ok ? invT.point.I_ui.toFixed(3) + " " + pr.unitI : "未达标"}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  drawPlot();
+}
+
+// ================= 6. 事件绑定与交互逻辑 =================
+function bindPair(key, slId, inId) {
+  const sl = document.getElementById(slId);
+  const inp = document.getElementById(inId);
+  sl.addEventListener("input", () => { state[key] = parseFloat(sl.value); inp.value = sl.value; updateAll(); });
+  inp.addEventListener("input", () => {
+    const v = parseFloat(inp.value);
+    if (!isNaN(v)) { state[key] = v; sl.value = v; updateAll(); }
+  });
+}
+
+bindPair("Th", "sl_Th", "in_Th");
+bindPair("Imax", "sl_Imax", "in_Imax");
+bindPair("T0", "sl_T0", "in_T0");
+bindPair("T1", "sl_T1", "in_T1");
+bindPair("Rth", "sl_Rth", "in_Rth");
+bindPair("lam0", "sl_lam0", "in_lam0");
+bindPair("klam", "sl_klam", "in_klam");
+bindPair("dlam", "sl_dlam", "in_dlam");
+bindPair("Ptarget", "sl_Ptarget", "in_Ptarget");
+
+function applyPreset(key) {
+  state.presetKey = key;
+  const pr = PRESETS[key];
+  state.Th = pr.Th; state.Imax = pr.Imax; state.T0 = pr.T0; state.T1 = pr.T1;
+  state.Rth = pr.Rth; state.lam0 = pr.lam0; state.klam = pr.klam; state.dlam = pr.dlam;
+  state.Ptarget = pr.Ptarget;
+
+  // Update slider ranges
+  const slI = document.getElementById("sl_Imax"), inI = document.getElementById("in_Imax");
+  slI.min = inI.min = pr.ImaxMin; slI.max = inI.max = pr.ImaxMax; slI.step = inI.step = pr.ImaxStep;
+  const slP = document.getElementById("sl_Ptarget");
+  slP.max = pr.PtargetMax; slP.step = pr.PtargetMax > 100 ? 10 : 0.2;
+  const slR = document.getElementById("sl_Rth"), inR = document.getElementById("in_Rth");
+  slR.max = inR.max = pr.Rth > 50 ? 500 : 25; slR.step = inR.step = pr.Rth > 50 ? 5 : 0.2;
+
+  for (const k of ["Th","Imax","T0","T1","Rth","lam0","klam","dlam","Ptarget"]) {
+    document.getElementById("sl_" + k).value = state[k];
+    document.getElementById("in_" + k).value = state[k];
+  }
+  document.querySelectorAll(".preset-btn").forEach(b => b.classList.toggle("active", b.dataset.preset === key));
+  updateAll();
+}
+
+document.querySelectorAll(".preset-btn").forEach(btn => {
+  btn.addEventListener("click", () => applyPreset(btn.dataset.preset));
+});
+document.getElementById("btnReset").addEventListener("click", () => applyPreset(state.presetKey));
+
+document.getElementById("modeCW").addEventListener("click", () => {
+  state.mode = "CW";
+  document.getElementById("modeCW").classList.add("active");
+  document.getElementById("modePulsed").classList.remove("active");
+  updateAll();
+});
+document.getElementById("modePulsed").addEventListener("click", () => {
+  state.mode = "Pulsed";
+  document.getElementById("modePulsed").classList.add("active");
+  document.getElementById("modeCW").classList.remove("active");
+  updateAll();
+});
+
+document.getElementById("chkMultiT").addEventListener("change", e => { state.showMultiT = e.target.checked; updateAll(); });
+document.getElementById("chkExp").addEventListener("change", e => { state.showExp = e.target.checked; updateAll(); });
+
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    state.tab = btn.dataset.tab;
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b === btn));
+    drawPlot();
+  });
+});
+
+// Mouse hover tooltip
+canvas.addEventListener("mousemove", e => {
+  if (!lastPlotMeta) return;
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  const { pad, pw, ph, xMin, xMax, type } = lastPlotMeta;
+  if (mx < pad.l || mx > pad.l + pw || my < pad.t || my > pad.t + ph) {
+    tooltip.style.display = "none"; return;
+  }
+  const xVal = xMin + ((mx - pad.l) / pw) * (xMax - xMin);
+  const pr = PRESETS[state.presetKey];
+  let html = "";
+  if (type === "pi" || type === "tj") {
+    const pt = solvePoint(xVal, state.Th, state);
+    html = `<b>I = ${pt.I_ui.toFixed(3)} ${pr.unitI}</b><br>P<sub>out</sub> = ${pt.Pout_mW.toFixed(2)} mW<br>T<sub>j</sub> = ${pt.Tj_C.toFixed(1)} °C | λ = ${pt.lam_p.toFixed(2)} nm`;
+    if (pr.isDPSSL) html += `<br>P<sub>pump</sub> = ${pt.Pp_mW.toFixed(1)} mW | η<sub>a</sub> = ${(pt.eta_a*100).toFixed(1)}%`;
+  } else if (type === "pp") {
+    let best = lastPlotMeta.pts[0], bestD = 1e9;
+    for (const p of lastPlotMeta.pts) {
+      const d = Math.abs(p.Pp_mW - xVal);
+      if (d < bestD) { bestD = d; best = p; }
+    }
+    html = `<b>P<sub>pump</sub> = ${best.Pp_mW.toFixed(1)} mW</b><br>P<sub>out</sub> = ${best.Pout_mW.toFixed(2)} mW<br>I = ${best.I_ui.toFixed(2)} A | η<sub>a</sub> = ${(best.eta_a*100).toFixed(1)}%`;
+  } else {
+    const idx = Math.min(lastPlotMeta.Ts.length - 1, Math.max(0, Math.round((xVal - 10) / 2)));
+    const t = lastPlotMeta.Ts[idx], po = lastPlotMeta.Pouts[idx], ith = lastPlotMeta.Iths[idx];
+    html = `<b>T<sub>h</sub> = ${t} °C</b><br>P<sub>out</sub> = ${po.toFixed(2)} mW<br>I<sub>th</sub> = ${ith !== null ? ith.toFixed(3) + " " + pr.unitI : "未起振"}`;
+  }
+  tooltip.innerHTML = html;
+  tooltip.style.display = "block";
+  tooltip.style.left = Math.min(mx + 14, rect.width - 190) + "px";
+  tooltip.style.top = Math.max(my - 10, 8) + "px";
+});
+canvas.addEventListener("mouseleave", () => { tooltip.style.display = "none"; });
+
+// Export CSV & PNG
+document.getElementById("btnExportCSV").addEventListener("click", () => {
+  const pr = PRESETS[state.presetKey];
+  const pts = simulateCurve(state.Th, state, 200);
+  let csv = `\uFEFFCurrent_${pr.unitI},P_pump_mW,P_out_mW,T_j_C,Wavelength_nm,Eta_abs\n`;
+  for (const p of pts) {
+    csv += `${p.I_ui.toFixed(4)},${p.Pp_mW.toFixed(3)},${p.Pout_mW.toFixed(3)},${p.Tj_C.toFixed(2)},${p.lam_p.toFixed(3)},${p.eta_a.toFixed(4)}\n`;
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+  a.download = `PI_sim_${state.presetKey}_Th${state.Th}C.csv`;
+  a.click();
+});
+
+document.getElementById("btnExportPNG").addEventListener("click", () => {
+  const a = document.createElement("a");
+  a.href = canvas.toDataURL("image/png");
+  a.download = `PI_plot_${state.presetKey}_${state.tab}_Th${state.Th}C.png`;
+  a.click();
+});
+
+window.addEventListener("resize", drawPlot);
+applyPreset("ndyvo4");
+</script>
+</body>
+</html>
